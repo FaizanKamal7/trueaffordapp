@@ -1,0 +1,57 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const title = "Page Not Found - TrueAfford";
+const description = "That page doesn't exist. Find your way back to TrueAfford's affordability calculators.";
+const popularLinks = [
+  { href: "/home-affordability-calculator", label: "Home Affordability Calculator" },
+  { href: "/mortgage-calculator", label: "Mortgage Calculator" },
+  { href: "/rent-affordability-calculator", label: "Rent Affordability Calculator" },
+  { href: "/car-affordability-calculator", label: "Car Affordability Calculator" },
+];
+---
+
+<Layout title={title} description={description} robots="noindex, follow">
+  <section class="container error-hero">
+    <div class="error-visual" aria-hidden="true"><span class="error-code">404</span><span class="error-marker">?</span></div>
+    <p class="eyebrow">Page not found</p>
+    <h1>This page doesn't add up</h1>
+    <p class="intro">The link may be outdated, or the page may have moved. Let's get you back to a number that does.</p>
+    <div class="actions">
+      <a class="btn-primary" href="/">Back to homepage <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn-secondary" href="/home-affordability-calculator">Find your home budget</a>
+    </div>
+    <div class="popular">
+      <p class="popular-heading">Or jump to a calculator</p>
+      <ul class="popular-list">
+        {popularLinks.map((link) => (<li><a href={link.href}>{link.label}</a></li>))}
+      </ul>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .error-hero { padding-block: var(--space-4xl); max-width: 680px; text-align: center; margin-inline: auto; }
+  .error-visual { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 218px; height: 118px; margin-bottom: var(--space-lg); }
+  .error-visual::before, .error-visual::after { content: ""; position: absolute; width: 44px; height: 44px; border: 1px solid var(--color-hairline); border-radius: 50%; background: var(--color-canvas-elevated); }
+  .error-visual::before { left: 2px; bottom: 4px; }
+  .error-visual::after { right: 0; top: 3px; }
+  .error-code { font-family: var(--font-mono); font-size: clamp(72px, 14vw, 112px); font-weight: 600; line-height: 1; letter-spacing: -0.08em; color: var(--color-faint); }
+  .error-marker { position: absolute; right: 12px; bottom: 6px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--color-ink); color: var(--color-on-ink); font-family: var(--font-mono); font-size: 16px; font-weight: 500; z-index: 1; }
+  .error-hero .eyebrow { margin-bottom: var(--space-xs); }
+  .error-hero h1 { font-size: var(--text-heading-lg-size); font-weight: var(--text-heading-lg-weight); line-height: var(--text-heading-lg-leading); letter-spacing: var(--text-heading-lg-tracking); margin-bottom: var(--space-sm); }
+  .error-hero .intro { font-size: var(--text-body-lg-size); line-height: var(--text-body-lg-leading); color: var(--color-body); margin-inline: auto; max-width: 51ch; margin-bottom: var(--space-lg); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-sm); }
+  .btn-primary, .btn-secondary { display: inline-block; text-decoration: none; border-radius: var(--radius-pill); padding: var(--space-sm) var(--space-lg); font-size: var(--text-button-lg-size); font-weight: var(--text-button-lg-weight); min-height: 44px; line-height: 20px; }
+  .btn-primary { background: var(--color-ink); color: var(--color-on-ink); }
+  .btn-primary span { display: inline-block; margin-left: 4px; transition: transform 0.15s ease; }
+  .btn-primary:hover span { transform: translateX(3px); }
+  .btn-secondary { color: var(--color-ink); border: 1px solid var(--color-hairline); }
+  .btn-secondary:hover { border-color: var(--color-ink); }
+  .popular { margin-top: var(--space-3xl); padding-top: var(--space-lg); border-top: 1px solid var(--color-hairline); }
+  .popular-heading { font-size: var(--text-label-sm-size); font-weight: 600; color: var(--color-mute); margin-bottom: var(--space-sm); }
+  .popular-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-xs); }
+  .popular-list a { display: inline-block; color: var(--color-body); text-decoration: none; font-size: var(--text-body-md-size); border: 1px solid var(--color-hairline); border-radius: var(--radius-full); padding: var(--space-xs) var(--space-md); }
+  .popular-list a:hover { border-color: var(--color-ink); color: var(--color-ink); }
+  @media (max-width: 480px) { .error-hero { padding-block: var(--space-3xl); } .actions > a { width: 100%; } }
+</style>

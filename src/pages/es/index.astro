@@ -1,0 +1,923 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Faq from "../../components/layout/Faq.astro";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const title = "TrueAfford — La Calculadora de Asequibilidad Que No Te Vende Nada";
+const description =
+  "Casi todas las calculadoras de asequibilidad de vivienda pertenecen a una empresa que vende contactos hipotecarios. Esta no. Gastos reales, impuestos y seguro a nivel estatal, sin anuncios en el resultado.";
+
+const categories = [
+  {
+    index: "01",
+    name: "Comprar una vivienda",
+    blurb: "La decisión central — precio, pago, y los costos que aparecen después del cierre.",
+    tools: [
+      {
+        href: localizedPath(locale, "home-affordability-calculator"),
+        title: "Calculadora de Asequibilidad de Vivienda",
+        description: "Cuánta casa pueden realmente sostener tu ingreso, tus deudas y tus gastos reales.",
+        size: "featured",
+      },
+      {
+        href: localizedPath(locale, "mortgage-calculator"),
+        title: "Calculadora de Hipoteca",
+        description: "El desglose completo del pago mensual para un precio, una tasa y un enganche específicos.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "house-affordability-calculator"),
+        title: "Calculadora de Asequibilidad de Casa",
+        description: "El costo real de ser propietario, incluyendo la reserva de mantenimiento que la mayoría de las calculadoras omite.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "closing-costs-calculator"),
+        title: "Calculadora de Costos de Cierre",
+        description: "El efectivo que necesitas más allá del enganche — del 2% al 5% del precio de la vivienda.",
+        size: "compact",
+      },
+      {
+        href: localizedPath(locale, "amortization-schedule-calculator"),
+        title: "Calculadora de Tabla de Amortización",
+        description: "Lo que un pago extra realmente le hace a tu préstamo, año por año.",
+        size: "compact",
+      },
+    ],
+  },
+  {
+    index: "02",
+    name: "Alquilar",
+    blurb: "El mismo rigor que comprar: lo que puedes pagar, y si comprar realmente te convendría más.",
+    tools: [
+      {
+        href: localizedPath(locale, "rent-affordability-calculator"),
+        title: "Calculadora de Asequibilidad de Alquiler",
+        description: "Lo que realmente puedes pagar de alquiler, verificado contra tres reglas, no solo una.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "rent-vs-buy-calculator"),
+        title: "Calculadora de Alquilar vs. Comprar",
+        description: "Una simulación mes a mes de patrimonio neto — ve cuándo comprar realmente toma la delantera.",
+        size: "medium",
+      },
+    ],
+  },
+  {
+    index: "03",
+    name: "Presupuesto y otras grandes compras",
+    blurb: "Dónde encaja la vivienda en tu presupuesto, y el otro gran préstamo que la gente subestima.",
+    tools: [
+      {
+        href: localizedPath(locale, "budget-calculator"),
+        title: "Calculadora de Presupuesto",
+        description: "Ve dónde encaja tu pago real de vivienda dentro de la regla 50/30/20.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "car-affordability-calculator"),
+        title: "Calculadora de Asequibilidad de Auto",
+        description: "Cuánto auto puedes pagar bajo la regla 20/4/10, incluyendo impuesto de venta y seguro.",
+        size: "medium",
+      },
+    ],
+  },
+];
+
+const whyItems = [
+  {
+    title: "Gastos reales, no solo deudas",
+    body: "Cuidado infantil, salud, alimentos y transporte tienen campos propios — no una nota al pie que te dice que los metas en una casilla de \"deudas mensuales\".",
+  },
+  {
+    title: "Tu estado, no un promedio nacional",
+    body: "El impuesto predial por sí solo va de aproximadamente 0.27% a 2.2% del valor de la vivienda según dónde vivas. Esta calculadora usa la tasa de tu estado, no una estimación combinada.",
+  },
+  {
+    title: "Una reserva de mantenimiento, incluida por defecto",
+    body: "1% del valor de la vivienda al año, presupuestado automáticamente — un costo real de ser propietario que las demás calculadoras omiten en silencio.",
+  },
+  {
+    title: "Aprobación del prestamista frente a lo sostenible, lado a lado",
+    body: "Lo que un prestamista probablemente apruebe y lo que tu hogar puede realmente sostener suelen ser números distintos. Esta es la única calculadora que nombra esa diferencia.",
+  },
+];
+
+const faqs = [
+  {
+    question: "¿Cuánta casa puedo pagar?",
+    answer:
+      "Depende de tu ingreso bruto, deudas existentes, enganche, tasa de interés, y las tasas de impuesto predial y seguro de tu estado — pero también de costos mensuales reales como cuidado infantil, alimentos, salud y transporte que la mayoría de las calculadoras ignora. La Calculadora de Asequibilidad de Vivienda te da tres respuestas en lugar de una: un precio Cómodo que deja un colchón real, un precio Ajustado que es más apretado pero sostenible, y un precio Riesgoso — lo máximo que las razones de un prestamista por sí solas aprobarían.",
+  },
+  {
+    question: "¿Cuál es la mejor calculadora de asequibilidad de vivienda?",
+    answer:
+      "La mejor cuenta tus gastos mensuales reales, no solo los pagos de deuda, y usa las tasas de impuesto predial y seguro de tu estado en lugar de un promedio nacional. También debería mostrarte dos números — lo que un prestamista probablemente aprobaría y lo que tu hogar realmente puede sostener — en lugar de una sola cifra halagadora. TrueAfford hace ambas cosas, y no lleva anuncios de prestamistas ni vende tu información, ya que no hay ningún negocio de generación de contactos detrás de ella.",
+  },
+  {
+    question: "¿Qué calculadora de asequibilidad de vivienda debería usar?",
+    answer:
+      "Usa una que separe la aprobación del prestamista de la sostenibilidad del hogar, y que te permita ingresar gastos reales — cuidado infantil, alimentos, salud, transporte — en lugar de meter todo en un solo campo de \"deudas mensuales\". Si una calculadora solo pregunta por ingreso y deudas, solo te está dando la mitad del panorama. Esta pregunta por ambos y muestra la brecha.",
+  },
+  {
+    question: "¿Cómo uso una calculadora de asequibilidad de préstamo de vivienda?",
+    answer:
+      "Ingresa tu ingreso bruto anual, tus pagos mensuales de deuda (préstamos de auto, préstamos estudiantiles, tarjetas de crédito), tu enganche planeado, y el estado donde vas a comprar. Añade tus gastos mensuales reales — cuidado infantil, alimentos, salud, transporte — si la calculadora los admite. El resultado debería mostrar un precio máximo de vivienda junto con los supuestos detrás de él, idealmente desglosado en una cifra de aprobación del prestamista y una cifra sostenible por el hogar en lugar de un solo número.",
+  },
+  {
+    question: "¿Cómo funciona una calculadora de asequibilidad de vivienda?",
+    answer:
+      "La mayoría de las calculadoras aplican razones de deuda a ingreso del prestamista — típicamente limitando los costos de vivienda a alrededor del 28% del ingreso bruto (razón inicial) y la deuda total a alrededor del 36-43% (razón final) — y luego resuelven para el precio de vivienda que esos límites permiten. TrueAfford hace eso, pero también ejecuta una prueba independiente: resta tus gastos mensuales reales de tu ingreso para ver qué puede realmente sostener tu hogar, y luego reporta ambos resultados lado a lado.",
+  },
+  {
+    question: "Gano $70,000 al año, ¿cuánta casa puedo pagar?",
+    answer:
+      "Con $70,000 al año (unos $5,833/mes brutos), una razón inicial estándar del 28% coloca tu presupuesto de vivienda alrededor de $1,630/mes, lo cual — dependiendo de tu tasa de interés, enganche, impuesto predial y seguro — a menudo cae en un rango de precio de vivienda de aproximadamente $220,000 a $280,000. Esa cifra se mueve mucho según tus deudas existentes, el tamaño de tu enganche y tus gastos mensuales reales, así que vale la pena ingresar tus números reales en la calculadora en lugar de confiar en una regla general.",
+  },
+  {
+    question: "¿Cuánto puedo pagar para comprar una casa?",
+    answer:
+      "Empieza con tu ingreso bruto y resta los pagos de deuda existentes para ver qué permitirían las razones de un prestamista — luego resta tus gastos mensuales reales (cuidado infantil, alimentos, salud, transporte) para ver qué puede realmente sostener tu presupuesto. La brecha entre esos dos números suele ser más grande de lo que la gente espera. Usa la Calculadora de Asequibilidad de Vivienda para obtener ambas cifras usando tu ingreso, deudas, enganche y estado reales.",
+  },
+  {
+    question: "¿Cómo funciona TrueAfford?",
+    answer:
+      "Ingresas tu ingreso, deudas, enganche y gastos mensuales reales, junto con el estado donde vas a comprar. TrueAfford procesa tus números a través de las razones estándar de deuda a ingreso de los prestamistas para averiguar para qué probablemente calificarías, y luego ejecuta una segunda prueba independiente contra tu presupuesto real para averiguar qué puedes sostener sin ahogarte. Muestra ambos como rangos de precio Cómodo, Ajustado y Riesgoso, usando las tasas específicas de impuesto predial y seguro de tu estado en lugar de un promedio nacional — sin cuenta, sin correo electrónico y sin anuncios en el resultado.",
+  },
+  {
+    question: "¿Por qué TrueAfford es gratis?",
+    answer:
+      "La mayoría de las calculadoras de asequibilidad de vivienda son construidas por empresas que ganan dinero cuando solicitas un préstamo, haces clic en un anuncio de prestamista, o entregas tu información de contacto — así que un número aprobado más grande sirve a su negocio incluso cuando no sirve al tuyo. TrueAfford no vende contactos, anuncios ni tus datos, así que no hay incentivo para inflar el resultado, ni costo alguno por operar una calculadora que hace la misma aritmética que todas las demás.",
+  },
+];
+
+const homeHref = localizedPath(locale, "home-affordability-calculator");
+const methodologyHref = localizedPath(locale, "methodology");
+const houseHref = localizedPath(locale, "house-affordability-calculator");
+const mortgageHref = localizedPath(locale, "mortgage-calculator");
+const rentHref = localizedPath(locale, "rent-affordability-calculator");
+const budgetHref = localizedPath(locale, "budget-calculator");
+const carHref = localizedPath(locale, "car-affordability-calculator");
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="">
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="eyebrow hero-eyebrow">TrueAfford</p>
+      <h1 class="hero-heading">La calculadora de asequibilidad<br />que no te vende nada</h1>
+      <p class="intro hero-intro">
+        La calculadora de NerdWallet trae anuncios de prestamistas junto a tu resultado. Zillow quiere que navegues propiedades. Rocket Mortgage quiere una solicitud. Ninguno gana dinero diciéndote que el número es más pequeño de lo que esperabas
+        — esta no tiene contactos que vender, así que no lo necesita.
+      </p>
+      <div class="hero-cta-row">
+        <a class="btn-primary" href={homeHref}>Calcula lo que puedes pagar</a>
+      </div>
+      <p class="hero-facts">Sin cuenta &middot; Sin anuncios de prestamistas &middot; Gratis</p>
+
+      <div class="hero-figure">
+        <div class="hero-figure-blob" aria-hidden="true"></div>
+        <img class="hero-figure-img" src="/hero-illustration.svg" alt="" width="1200" height="1200" loading="eager" />
+        <div class="hero-figure-ground" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-band">
+    <div class="container">
+      {
+        categories.map((category) => {
+          const featured = category.tools.filter((t) => t.size === "featured");
+          const medium = category.tools.filter((t) => t.size === "medium");
+          const compact = category.tools.filter((t) => t.size === "compact");
+          return (
+            <div class="category">
+              <div class="category-header">
+                <p class="category-index">{category.index}</p>
+                <div>
+                  <h2>{category.name}</h2>
+                  <p class="category-blurb">{category.blurb}</p>
+                </div>
+              </div>
+
+              <div class="category-tools">
+                {featured.length > 0 && (
+                  <div class="tool-featured-wrap">
+                    {featured.map((tool) => (
+                      <a class="tool-featured" href={tool.href}>
+                        <div class="tool-featured-text">
+                          <p class="tool-kicker">Empieza aquí</p>
+                          <p class="tool-title">{tool.title}</p>
+                          <p class="tool-description">{tool.description}</p>
+                          <span class="tool-arrow">
+                            Calcular <span aria-hidden="true">→</span>
+                          </span>
+                        </div>
+                        <div class="tool-featured-visual" aria-hidden="true">
+                          <div class="tier-bar">
+                            <span class="tier-zone tier-comfortable" style="width:45%" />
+                            <span class="tier-zone tier-stretch" style="width:30%" />
+                            <span class="tier-zone tier-risky" style="width:15%" />
+                            <span class="tier-zone tier-beyond" style="width:10%" />
+                          </div>
+                          <div class="tier-labels">
+                            <span>Cómodo</span>
+                            <span>Ajustado</span>
+                            <span>Riesgoso</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {medium.length > 0 && (
+                  <div class="tool-medium-grid">
+                    {medium.map((tool) => (
+                      <a class="tool-medium" href={tool.href}>
+                        <p class="tool-title">{tool.title}</p>
+                        <p class="tool-description">{tool.description}</p>
+                        <span class="tool-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {compact.length > 0 && (
+                  <div class="tool-compact-list">
+                    {compact.map((tool) => (
+                      <a class="tool-compact" href={tool.href}>
+                        <span class="tool-compact-title">{tool.title}</span>
+                        <span class="tool-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section class="container why">
+    <div class="why-grid">
+      <div class="why-heading">
+        <p class="eyebrow">La diferencia</p>
+        <h2>Por qué el número suele ser más pequeño aquí</h2>
+        <a class="methodology-link" href={methodologyHref}>Lee la metodología completa →</a>
+      </div>
+      <ol class="why-list">
+        {
+          whyItems.map((item, i) => (
+            <li>
+              <span class="why-index" aria-hidden="true">
+                {String.fromCharCode(97 + i)}
+              </span>
+              <div>
+                <p class="why-title">{item.title}</p>
+                <p>{item.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="container about">
+    <p class="eyebrow">Por qué existe esto</p>
+    <h2>Lo que una calculadora de asequibilidad realmente necesita decirte</h2>
+    <p class="lede">
+      Escribe "cuánta casa puedo pagar" en un buscador y llegarás a una docena de calculadoras de asequibilidad, la mayoría construidas por una empresa que gana dinero en el momento en que solicitas un préstamo. Se supone que una
+      calculadora de asequibilidad debe responder una sola pregunta honesta — qué puede pagar tu hogar cada mes, durante años, sin ahogarse — y aun así los incentivos de las empresas que las construyen empujan en la
+      dirección contraria: montos aprobados más grandes significan comisiones más grandes, más impresiones publicitarias, más comisiones por generación de contactos. TrueAfford existe porque esa pregunta merece una respuesta que nadie tenga interés en torcer.
+    </p>
+
+    <h3>Vivienda, casa o hipoteca — la misma pregunta</h3>
+    <p>
+      Como sea que llames a la herramienta que buscas, responde una sola pregunta: tomar tu ingreso, restar tus deudas y gastos reales, aplicar los límites de razón de un prestamista y resolver para el precio de vivienda más
+      grande que ese resultado soporta. Las diferencias entre estas herramientas no están en el nombre; están en lo que se cuenta. Una calculadora que ignora el cuidado infantil, los alimentos y la salud siempre mostrará un
+      número más grande que una que no lo hace, que es exactamente por qué tantas de ellas lo hacen.
+    </p>
+    <p>
+      Antes de comprar una casa, el número que importa no es lo que un prestamista está dispuesto a aprobar — es lo que tu hogar puede pagar en un mes flojo, después de una reparación del auto, sin tocar los ahorros. Esa es la
+      brecha alrededor de la cual está construido este sitio: una cifra de aprobación del prestamista y una cifra sostenible, mostradas lado a lado en la <a href={homeHref}>Calculadora de Asequibilidad de Vivienda</a>, la
+      <a href={houseHref}>Calculadora de Asequibilidad de Casa</a>, y la <a href={mortgageHref}>Calculadora de Hipoteca</a>, cada una tomando las tasas de impuesto predial y seguro específicas de tu estado en lugar de un
+      promedio nacional combinado. La asequibilidad de casa y la asequibilidad hipotecaria no son un solo número — son un rango, y saber dónde termina Cómodo y empieza Riesgoso vale más que cualquier cifra única que una calculadora te
+      entregue.
+    </p>
+
+    <h3>Alquilar y presupuestar siguen la misma matemática</h3>
+    <p>
+      No todo el que está en el mercado para comprar debería comprar, y este sitio trata el alquiler con el mismo rigor. La <a href={rentHref}>Calculadora de Asequibilidad de Alquiler</a> verifica tres reglas independientes — la
+      pauta del 30% del ingreso, la prueba de evaluación del 40x el ingreso anual que los arrendadores realmente usan, y una prueba de ingreso sobrante después de gastos reales — y reporta la que sea más estricta, no la que sea más halagadora. Una
+      vez que tienes un número de vivienda, ya sea un pago hipotecario o un alquiler, la <a href={budgetHref}>Calculadora de Presupuesto Mensual</a> lo ubica automáticamente dentro de la regla 50/30/20, usando las mismas
+      cifras de ingreso y gastos que ya ingresaste, así que necesidades, deseos y ahorros nunca son una hoja de cálculo aparte.
+    </p>
+
+    <h3>La asequibilidad de un préstamo de auto merece el mismo rigor que la de un préstamo de casa</h3>
+    <p>
+      La vivienda suele ser el costo recurrente más grande que lleva un hogar, pero para la mayoría de las personas un préstamo de auto ocupa un cercano segundo lugar — y la asequibilidad de un préstamo de auto recibe casi ninguno del escrutinio que sí recibe la de un préstamo de casa.
+      La <a href={carHref}>Calculadora de Asequibilidad de Auto</a> aplica aquí el mismo estándar: la ampliamente citada regla 20/4/10 (20% de enganche, cuatro años o menos, no más del 10% del ingreso bruto), más el
+      impuesto de venta estatal y una estimación real del seguro, más la prueba de ingreso sobrante que separa lo que un concesionario financiará de lo que tu presupuesto realmente puede sostener. Ya sea que la deuda sea una hipoteca o un préstamo de auto, la
+      disciplina debería ser idéntica — verificarla contra el ingreso y los gastos reales, no contra la razón más optimista de un prestamista.
+    </p>
+    <p>
+      Ninguna de estas calculadoras requiere una cuenta, un número de teléfono o un correo electrónico, y ninguna te muestra un anuncio de prestamista junto a tu resultado — simplemente no hay nada aquí que vender. Cada fórmula, cada fuente de datos
+      y cada suposición está documentada por completo en la <a href={methodologyHref}>página de metodología</a>, fechada y con su fuente, para que puedas verificar la matemática en lugar de confiar en una caja negra. Calcula los números, ve exactamente por qué
+      salieron como salieron, y usa la respuesta para negociar desde una posición que realmente entiendes.
+    </p>
+  </section>
+
+  <Faq eyebrow="Preguntas comunes" faqs={faqs} locale={locale} />
+
+  <section class="cta-band">
+    <div class="container cta-inner">
+      <p class="eyebrow">Listo cuando tú lo estés</p>
+      <h2>Obtén tu número en menos de tres minutos.</h2>
+      <p>Sin cuenta. Sin anuncios junto a tu resultado. Ningún prestamista te llamará mañana.</p>
+      <a class="btn-inverse" href={homeHref}>Calcula lo que puedes pagar</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    background:
+      radial-gradient(circle at 78% 42%, var(--color-nav-glow) 0, transparent 34%),
+      linear-gradient(120deg, var(--color-nav-start) 0%, var(--color-nav-middle) 52%, var(--color-nav-end) 100%);
+    border-bottom: 1px solid var(--color-nav-border);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .hero-inner {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-areas:
+      "eyebrow"
+      "heading"
+      "figure"
+      "intro"
+      "cta"
+      "facts";
+  }
+
+  @media (min-width: 1024px) {
+    .hero-inner {
+      grid-template-columns: 1.05fr 1fr;
+      grid-template-areas:
+        "eyebrow figure"
+        "heading figure"
+        "intro   figure"
+        "cta     figure"
+        "facts   figure";
+      align-items: center;
+      gap: var(--space-2xl);
+      padding-block: var(--space-xl) 0;
+    }
+  }
+
+  .hero-eyebrow {
+    grid-area: eyebrow;
+  }
+
+  .hero-heading {
+    grid-area: heading;
+    font-size: var(--text-display-xl-size);
+    font-weight: var(--text-display-xl-weight);
+    line-height: var(--text-display-xl-leading);
+    letter-spacing: var(--text-display-xl-tracking);
+    margin-block: var(--space-sm) 0;
+  }
+
+  @media (max-width: 640px) {
+    .hero-heading {
+      font-size: 32px;
+      line-height: 40px;
+      letter-spacing: -1.28px;
+    }
+  }
+
+  .hero-intro {
+    grid-area: intro;
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+    max-width: 52ch;
+  }
+
+  .hero-cta-row {
+    grid-area: cta;
+  }
+
+  .hero-facts {
+    grid-area: facts;
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+  }
+
+  .hero-figure {
+    grid-area: figure;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-figure-blob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 260px;
+    background: color-mix(in srgb, var(--color-nav-end) 62%, transparent);
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    transform: translate(-50%, -55%);
+    z-index: 0;
+  }
+
+  .hero-figure-ground {
+    position: absolute;
+    bottom: 6%;
+    left: 18%;
+    right: 18%;
+    height: 1px;
+    background: var(--color-hairline);
+    z-index: 0;
+  }
+
+  .hero-figure-img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-figure-blob {
+      width: 340px;
+      height: 340px;
+    }
+
+    .hero-figure-img {
+      max-width: 400px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .hero-figure {
+      margin-right: -48px;
+      justify-content: flex-end;
+    }
+
+    .hero-figure-img {
+      max-width: 460px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-figure-img {
+      animation: hero-float 7s ease-in-out infinite;
+    }
+  }
+
+  @keyframes hero-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  /* Tools band */
+  .tools-band {
+    background: var(--color-hairline-soft);
+    border-block: 1px solid var(--color-hairline);
+    padding-block: var(--space-2xl) var(--space-3xl);
+  }
+
+  .category-header {
+    display: flex;
+    gap: var(--space-md);
+    align-items: baseline;
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--color-hairline);
+    margin-bottom: var(--space-lg);
+  }
+
+  .category:first-child .category-header {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .category-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-eyebrow-size);
+    color: var(--color-faint);
+    flex-shrink: 0;
+  }
+
+  .category-header h2 {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+    line-height: var(--text-heading-md-leading);
+    letter-spacing: var(--text-heading-md-tracking);
+  }
+
+  .category-blurb {
+    color: var(--color-mute);
+    font-size: var(--text-body-sm-size);
+    margin-top: 2px;
+  }
+
+  .category-tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .tool-title {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+    margin-bottom: var(--space-xxs);
+  }
+
+  .tool-description {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+  }
+
+  .tool-arrow {
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tool-arrow span {
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  /* Featured tool */
+  .tool-featured {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    background: var(--color-canvas-elevated);
+    padding: var(--space-xl);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+  }
+
+  .tool-featured:hover {
+    border-color: var(--color-ink);
+  }
+
+  .tool-featured:hover .tool-arrow span {
+    transform: translateX(3px);
+  }
+
+  .tool-featured-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tool-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-mute);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .tool-featured .tool-description {
+    max-width: 46ch;
+    margin-bottom: var(--space-md);
+  }
+
+  .tool-featured-visual {
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+  .tier-bar {
+    display: flex;
+    height: 10px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--color-hairline);
+    margin-bottom: var(--space-xs);
+  }
+
+  .tier-zone {
+    height: 100%;
+  }
+
+  .tier-comfortable {
+    background: var(--color-comfortable);
+  }
+
+  .tier-stretch {
+    background: var(--color-stretch);
+  }
+
+  .tier-risky {
+    background: var(--color-risky);
+  }
+
+  .tier-beyond {
+    background: var(--color-hairline);
+  }
+
+  .tier-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-mute);
+  }
+
+  @media (max-width: 900px) {
+    .tool-featured {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .tool-featured-visual {
+      width: 100%;
+    }
+  }
+
+  /* Medium tools */
+  .tool-medium-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  @media (max-width: 640px) {
+    .tool-medium-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tool-medium {
+    display: block;
+    position: relative;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    padding-right: var(--space-2xl);
+    text-decoration: none;
+    color: inherit;
+    background: var(--color-canvas-elevated);
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .tool-medium:hover {
+    border-color: var(--color-ink);
+    background: var(--color-hairline-soft);
+  }
+
+  .tool-medium .tool-arrow {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    color: var(--color-mute);
+  }
+
+  .tool-medium:hover .tool-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Compact tools */
+  .tool-compact-list {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-canvas-elevated);
+  }
+
+  .tool-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    min-height: 44px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--color-hairline-soft);
+  }
+
+  .tool-compact:last-child {
+    border-bottom: none;
+  }
+
+  .tool-compact:hover {
+    background: var(--color-hairline-soft);
+  }
+
+  .tool-compact:hover .tool-arrow {
+    transform: translateX(3px);
+  }
+
+  .tool-compact-title {
+    font-size: var(--text-body-md-size);
+    font-weight: 500;
+  }
+
+  /* Why section */
+  .why {
+    padding-block: var(--space-4xl);
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    gap: var(--space-2xl);
+  }
+
+  @media (max-width: 900px) {
+    .why-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .why-heading h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    line-height: var(--text-heading-lg-leading);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .methodology-link {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .methodology-link:hover {
+    text-decoration: underline;
+  }
+
+  .why-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .why-list li {
+    display: flex;
+    gap: var(--space-md);
+    padding-block: var(--space-lg);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .why-list li:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .why-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm-size);
+    color: var(--color-faint);
+    flex-shrink: 0;
+    padding-top: 3px;
+  }
+
+  .why-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xxs);
+    color: var(--color-ink);
+  }
+
+  .why-list p:not(.why-title) {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+  }
+
+  /* About */
+  .about {
+    max-width: 760px;
+    padding-bottom: var(--space-3xl);
+  }
+
+  .about h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    line-height: var(--text-heading-lg-leading);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .about h3 {
+    font-size: var(--text-heading-md-size);
+    font-weight: var(--text-heading-md-weight);
+    line-height: var(--text-heading-md-leading);
+    border-top: 1px solid var(--color-hairline);
+    padding-top: var(--space-lg);
+    margin-block: var(--space-2xl) var(--space-xs);
+  }
+
+  .about p {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+    margin-bottom: var(--space-md);
+  }
+
+  .about .lede {
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+    color: var(--color-body);
+  }
+
+  .about a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .about a:hover {
+    text-decoration: underline;
+  }
+
+  /* Closing CTA band */
+  .cta-band {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    padding-block: var(--space-4xl);
+  }
+
+  .cta-inner {
+    max-width: 640px;
+  }
+
+  .cta-band .eyebrow {
+    color: var(--color-on-ink-muted);
+  }
+
+  .cta-band h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: 600;
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-sm);
+  }
+
+  .cta-band p {
+    color: var(--color-on-ink-muted);
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-lg);
+  }
+
+  .btn-inverse {
+    display: inline-block;
+    background: var(--color-on-ink);
+    color: var(--color-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+  }
+</style>

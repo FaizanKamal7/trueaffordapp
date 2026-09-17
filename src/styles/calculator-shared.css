@@ -1,0 +1,304 @@
+/*
+  Shared calculator component classes — the same visual language used by
+  AffordabilityCalculator.astro, reused directly (not reinvented) by the
+  breadth calculators (rent, budget, rent-vs-buy, amortization, closing
+  costs) so the whole site reads as one product.
+*/
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  font-size: var(--text-body-sm-size);
+  color: var(--color-body);
+}
+
+.field input,
+.field select {
+  background: var(--color-canvas-elevated);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  min-height: 44px;
+  width: 100%;
+}
+
+.field-group {
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.field-group legend {
+  font-size: var(--text-label-sm-size);
+  font-weight: 600;
+  padding: 0 var(--space-xs);
+  color: var(--color-ink);
+}
+
+.field-group-note {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-mute);
+  margin-top: calc(-1 * var(--space-xs));
+}
+
+.field-inline {
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--text-body-sm-size);
+}
+
+.field-inline legend {
+  font-weight: 500;
+  padding: 0;
+}
+
+.field-inline label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  min-height: 44px;
+}
+
+.info-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-hairline);
+  font-size: 11px;
+  text-decoration: none;
+  color: var(--color-mute);
+}
+
+.callout {
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-hairline);
+}
+
+.callout-title {
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.callout-unaffordable,
+.callout-negative {
+  background: var(--color-unaffordable-soft);
+  border-color: transparent;
+}
+
+.callout-positive {
+  background: var(--color-comfortable-soft);
+  border-color: transparent;
+}
+
+.callout-warning {
+  background: var(--color-warning-soft);
+  border-color: transparent;
+}
+
+.callout ul {
+  margin: 0;
+  padding-left: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-block {
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.stat-label {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-mute);
+  margin-bottom: var(--space-xxs);
+}
+
+.stat-value {
+  font-size: var(--text-heading-md-size);
+  font-weight: 600;
+}
+
+.section-heading {
+  font-weight: 600;
+  font-size: var(--text-label-sm-size);
+  margin-bottom: var(--space-xs);
+}
+
+.breakdown-list {
+  margin: 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.breakdown-row dt {
+  color: var(--color-body);
+  font-size: var(--text-body-sm-size);
+}
+
+.breakdown-row dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.breakdown-subtotal {
+  background: var(--color-hairline-soft);
+}
+
+.breakdown-total {
+  background: var(--color-ink);
+}
+
+.breakdown-total dt,
+.breakdown-total dd {
+  color: var(--color-on-ink);
+  font-weight: 600;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--text-button-lg-size);
+  font-weight: var(--text-button-lg-weight);
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary-sm,
+.btn-ghost-sm {
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-sm);
+  min-height: 44px;
+  font-size: var(--text-button-md-size);
+  font-weight: var(--text-button-md-weight);
+  cursor: pointer;
+}
+
+.btn-primary-sm {
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  border: none;
+}
+
+.btn-ghost-sm {
+  background: var(--color-canvas-elevated);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+}
+
+.share-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-hairline);
+  padding-top: var(--space-lg);
+}
+
+.share-row .field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.copy-confirmation {
+  color: var(--color-comfortable);
+  font-size: var(--text-body-sm-size);
+  align-self: center;
+}
+
+.tier-badge {
+  display: inline-block;
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--text-label-sm-size);
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.tier-badge[data-tier="comfortable"] {
+  background: var(--color-comfortable-soft);
+  color: var(--color-comfortable);
+}
+.tier-badge[data-tier="stretch"] {
+  background: var(--color-stretch-soft);
+  color: var(--color-stretch);
+}
+.tier-badge[data-tier="risky"] {
+  background: var(--color-risky-soft);
+  color: var(--color-risky);
+}
+.tier-badge[data-tier="unaffordable"] {
+  background: var(--color-unaffordable-soft);
+  color: var(--color-unaffordable);
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .calculator-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calculator-form-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  position: sticky;
+  top: var(--space-lg);
+}
+
+@media (max-width: 900px) {
+  .calculator-form-col {
+    position: static;
+  }
+}
+
+.results-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.two-col-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .two-col-stats {
+    grid-template-columns: 1fr;
+  }
+}

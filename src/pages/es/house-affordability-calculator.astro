@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { scenarioOgCopy } from "../../lib/seo";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "Calculadora de Asequibilidad de Casa — El Costo Real de Ser Propietario, No Solo de Pedir Prestado | TrueAfford";
+const description =
+  "Esta calculadora de asequibilidad de casa muestra el costo mensual real de ser propietario antes de comprar una casa: principal, interés, impuesto predial, seguro, PMI y una reserva de mantenimiento real del 1% del valor que la mayoría de las calculadoras omite por completo.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="house-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Asequibilidad de Casa"
+    heading="Lo que una casa realmente te cuesta cada mes"
+    intro="Un pago hipotecario no es el costo de ser propietario de una casa. Esta calculadora añade la parte que casi todos olvidan — una reserva de mantenimiento — encima del principal, el interés, el impuesto, el seguro y el PMI, para que el número que veas sea el número que realmente pagarás."
+    faqs={[
+      {
+        question: "¿Por qué hay una línea de mantenimiento que no pedí?",
+        answer:
+          "Porque es un costo real e inevitable de ser propietario de una casa, y la mayoría de las calculadoras la elimina en silencio para que el número se vea más pequeño. Esta presupuesta por defecto el 1% del valor de la vivienda al año — los techos, calentadores de agua y sistemas de calefacción y aire acondicionado no esperan un momento conveniente para fallar.",
+      },
+      {
+        question: "¿Cuándo desaparece el PMI?",
+        answer:
+          "El seguro hipotecario privado se requiere siempre que tu enganche sea menor al 20%. Por ley federal, se cancela automáticamente una vez que el saldo de tu préstamo se amortiza hasta el 78% del valor original de la vivienda — esta calculadora te muestra el mes exacto en que eso ocurre, en lugar de fingir que el PMI es un costo permanente o uno inexistente.",
+      },
+      {
+        question: "¿Es más barato un plazo de 15 o de 30 años?",
+        answer:
+          "Un plazo de 15 años lleva una tasa de interés más baja y genera plusvalía mucho más rápido, pero el pago mensual es notablemente más alto para el mismo monto de préstamo. Alterna el plazo del préstamo en la calculadora para ver tanto el pago mensual como la diferencia en el costo total para tus números específicos.",
+      },
+      {
+        question: "¿Qué pasa si doy menos del 20% de enganche?",
+        answer:
+          "Pagarás PMI hasta que cruces la línea del 78% de préstamo-valor, algo que esta calculadora desglosa como su propia línea en el desglose mensual — junto con cuánto tendría que ser un enganche adicional para saltártelo por completo.",
+      },
+      {
+        question: "¿Cuánta asequibilidad de casa necesito antes de comprar una casa?",
+        answer:
+          "Antes de comprar una casa, calcula tus números aquí primero, no en el escritorio del prestamista. La asequibilidad de casa no es solo el precio que un prestamista aprobará — es el precio que aún deja espacio en tu presupuesto después del impuesto, el seguro, el PMI y el mantenimiento. Esta calculadora muestra ambas cifras para que negocies desde tu propio número, no desde el de ellos.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Calculadora de hipoteca" },
+      { href: localizedPath(locale, "methodology"), label: "Metodología" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

@@ -1,0 +1,124 @@
+---
+import { DEFAULT_LOCALE, localizedPath, type LocaleCode } from "../../i18n/locales";
+import { CHROME } from "../../i18n/chrome";
+import Faq from "../layout/Faq.astro";
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface CrossLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  faqs: FaqItem[];
+  crossLinks: CrossLink[];
+  locale?: LocaleCode;
+}
+
+const { eyebrow, heading, intro, faqs, crossLinks, locale = DEFAULT_LOCALE } = Astro.props;
+const t = CHROME[locale].shell;
+const site = Astro.site ?? Astro.url.origin;
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "TrueAfford",
+      item: new URL(localizedPath(locale, ""), site).toString(),
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: heading,
+      item: new URL(Astro.url.pathname, site).toString(),
+    },
+  ],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+
+<section class="hero container">
+  <p class="eyebrow">{eyebrow}</p>
+  <h1>{heading}</h1>
+  <p class="intro">{intro}</p>
+</section>
+
+<section class="container calculator-section">
+  <slot />
+</section>
+
+<Faq faqs={faqs} locale={locale} />
+
+{
+  crossLinks.length > 0 && (
+    <section class="container cross-links">
+      <p>
+        {t.relatedLabel}{" "}
+        {crossLinks.map((link, i) => (
+          <>
+            <a href={link.href}>{link.label}</a>
+            {i < crossLinks.length - 1 ? " · " : ""}
+          </>
+        ))}
+      </p>
+    </section>
+  )
+}
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-2xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-display-xl-size);
+    font-weight: var(--text-display-xl-weight);
+    line-height: var(--text-display-xl-leading);
+    letter-spacing: var(--text-display-xl-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 {
+      font-size: 32px;
+      line-height: 40px;
+      letter-spacing: -1.28px;
+    }
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .calculator-section {
+    padding-bottom: var(--space-4xl);
+  }
+
+  .cross-links {
+    padding-bottom: var(--space-3xl);
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+  }
+
+  .cross-links a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .cross-links a:hover {
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,709 @@
+---
+import { decodeScenario, scenarioToQueryString } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { getDefaultInterestRate } from "../../lib/data/interest-rates-by-credit-band";
+import { PROPERTY_TAX_BY_STATE } from "../../lib/data/property-tax-by-state";
+import { CREDIT_BANDS } from "../../lib/data/pmi-rates";
+import { formatUSD, formatSignedUSD, formatPct } from "../../lib/format";
+import ScaleBar from "./ScaleBar.astro";
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const { affordability, sensitivity } = results;
+const { breakdown } = affordability;
+
+const stateList = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.state.localeCompare(b.state));
+const defaultRatePct = getDefaultInterestRate(scenario.creditBand, scenario.termYears) * 100;
+
+const shareQuery = scenarioToQueryString(scenario);
+const shareUrl = new URL(Astro.url.pathname + shareQuery, Astro.site ?? Astro.url.origin).toString();
+
+const tierLabels: Record<string, string> = {
+  comfortable: "Comfortable",
+  stretch: "Stretch",
+  risky: "Risky",
+  unaffordable: "Unaffordable",
+};
+
+const lenderSustainableGap = results.riskyMax - results.sustainableMax;
+---
+
+<div class="calculator" data-calculator>
+  <form id="calculator-form" class="calculator-form" method="get">
+    <fieldset class="field-group">
+      <legend>Income &amp; debts</legend>
+
+      <label class="field">
+        <span>Annual household income (gross)</span>
+        <input type="number" inputmode="numeric" name="gi" id="field-gi" min="0" step="1000" value={scenario.grossAnnualIncome} />
+      </label>
+
+      <label class="field">
+        <span>Monthly take-home pay (net)</span>
+        <input type="number" inputmode="numeric" name="ni" id="field-ni" min="0" step="50" value={scenario.netMonthlyIncome} />
+      </label>
+
+      <label class="field">
+        <span>Other monthly debt payments <a class="info-link" href="/methodology#dti" aria-label="Why this matters">?</a></span>
+        <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Real-life monthly expenses <a class="info-link" href="/methodology#leftover-income" aria-label="Why this matters">?</a></legend>
+      <p class="field-group-note">Lenders don't count these against you — but they determine whether the payment actually fits.</p>
+
+      <label class="field">
+        <span>Childcare</span>
+        <input type="number" inputmode="numeric" name="ec" id="field-ec" min="0" step="25" value={scenario.childcare} />
+      </label>
+      <label class="field">
+        <span>Healthcare</span>
+        <input type="number" inputmode="numeric" name="eh" id="field-eh" min="0" step="25" value={scenario.healthcare} />
+      </label>
+      <label class="field">
+        <span>Groceries</span>
+        <input type="number" inputmode="numeric" name="eg" id="field-eg" min="0" step="25" value={scenario.groceries} />
+      </label>
+      <label class="field">
+        <span>Transport</span>
+        <input type="number" inputmode="numeric" name="et" id="field-et" min="0" step="25" value={scenario.transport} />
+      </label>
+      <label class="field">
+        <span>Other</span>
+        <input type="number" inputmode="numeric" name="eo" id="field-eo" min="0" step="25" value={scenario.otherExpenses} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Loan assumptions</legend>
+
+      <label class="field">
+        <span>State</span>
+        <select name="st" id="field-st">
+          {
+            stateList.map((entry) => (
+              <option value={entry.stateCode} selected={entry.stateCode === scenario.stateCode}>
+                {entry.state}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Down payment available</span>
+        <input type="number" inputmode="numeric" name="dp" id="field-dp" min="0" step="1000" value={scenario.downPaymentDollars} />
+      </label>
+
+      <label class="field">
+        <span>Credit score band</span>
+        <select name="cb" id="field-cb">
+          {
+            CREDIT_BANDS.map((band) => (
+              <option value={band} selected={band === scenario.creditBand}>
+                {band}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Interest rate override (%) <a class="info-link" href="/methodology#rates" aria-label="Why this matters">?</a></span>
+        <input
+          type="number"
+          inputmode="decimal"
+          name="ir"
+          id="field-ir"
+          min="0"
+          max="20"
+          step="0.05"
+          placeholder={defaultRatePct.toFixed(2)}
+          value={scenario.interestRateOverride !== undefined ? (scenario.interestRateOverride * 100).toFixed(2) : ""}
+        />
+      </label>
+
+      <fieldset class="field-inline">
+        <legend>Loan term</legend>
+        <label><input type="radio" name="tm" value="30" checked={scenario.termYears === 30} /> 30-year</label>
+        <label><input type="radio" name="tm" value="15" checked={scenario.termYears === 15} /> 15-year</label>
+      </fieldset>
+
+      <label class="field">
+        <span>HOA dues (monthly)</span>
+        <input type="number" inputmode="numeric" name="hoa" id="field-hoa" min="0" step="10" value={scenario.hoaMonthly} />
+      </label>
+    </fieldset>
+
+    <noscript>
+      <button type="submit" class="btn-primary">Calculate</button>
+    </noscript>
+  </form>
+
+  <div class="results" id="results" aria-live="polite">
+    <div class="results-header">
+      <p class="eyebrow">Your result</p>
+      {
+        results.isUnaffordable ? (
+          <h2 id="result-headline" data-bind="headline">
+            Not affordable at this price yet
+          </h2>
+        ) : (
+          <h2 id="result-headline" data-bind="headline">
+            <span class="tier-badge" data-tier={affordability.tier} id="result-tier-badge">
+              {tierLabels[affordability.tier]}
+            </span>{" "}
+            — up to <strong id="result-evaluated-price" data-bind="evaluatedPrice">{formatUSD(results.evaluatedPrice)}</strong>
+          </h2>
+        )
+      }
+    </div>
+
+    <ScaleBar comfortableMax={results.comfortableMax} stretchMax={results.stretchMax} riskyMax={results.riskyMax} evaluatedPrice={results.evaluatedPrice} />
+
+    <div class="evaluate-row">
+      <label class="field">
+        <span>Test a specific home price</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          name="ep"
+          id="field-ep"
+          form="calculator-form"
+          min="0"
+          step="1000"
+          value={results.isCustomEvaluatedPrice ? results.evaluatedPrice : ""}
+          placeholder={String(results.defaultEvaluatedPrice)}
+        />
+      </label>
+      <button type="button" id="reset-evaluated-price" class="btn-ghost-sm" hidden={!results.isCustomEvaluatedPrice}>
+        Reset to recommended
+      </button>
+    </div>
+
+    {
+      results.isUnaffordable && (
+        <div class="callout callout-unaffordable" id="unaffordable-block">
+          <p class="callout-title">What would need to change</p>
+          <ul id="unaffordable-reasons">
+            {results.unaffordableReasons.map((reason) => (
+              <li>{reason}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    <div class="lender-vs-sustainable">
+      <div class="stat-block">
+        <p class="stat-label">A lender would likely approve up to</p>
+        <p class="stat-value" id="lender-max" data-bind="lenderMax">{formatUSD(results.riskyMax)}</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-label">You can actually sustain up to</p>
+        <p class="stat-value" id="sustainable-max" data-bind="sustainableMax">{formatUSD(results.sustainableMax)}</p>
+      </div>
+    </div>
+    <p class="gap-explanation" id="gap-explanation">
+      {lenderSustainableGap > 500
+        ? `That's a ${formatUSD(lenderSustainableGap)} gap — a lender may approve more home than your household's real budget can comfortably carry.`
+        : "Your budget can support at least as much as a lender's generous debt-to-income ceiling — the DTI limit isn't what's holding you back here."}
+    </p>
+
+    <div class="breakdown">
+      <p class="section-heading">Monthly cost at {formatUSD(results.evaluatedPrice)}</p>
+      <dl class="breakdown-list" id="breakdown-list">
+        <div class="breakdown-row">
+          <dt>Principal &amp; interest</dt>
+          <dd id="bd-pi" data-bind="pi">{formatUSD(breakdown.principalAndInterest)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>Property tax</dt>
+          <dd id="bd-tax" data-bind="tax">{formatUSD(breakdown.propertyTax)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>Homeowner's insurance</dt>
+          <dd id="bd-insurance" data-bind="insurance">{formatUSD(breakdown.insurance)}</dd>
+        </div>
+        <div class="breakdown-row" hidden={breakdown.pmi <= 0} id="bd-pmi-row">
+          <dt>
+            PMI
+            {breakdown.pmiDropoffMonth !== null && (
+              <span class="dt-note" id="bd-pmi-note">
+                {" "}
+                (drops at month {breakdown.pmiDropoffMonth})
+              </span>
+            )}
+          </dt>
+          <dd id="bd-pmi" data-bind="pmi">{formatUSD(breakdown.pmi)}</dd>
+        </div>
+        <div class="breakdown-row" hidden={breakdown.hoa <= 0} id="bd-hoa-row">
+          <dt>HOA dues</dt>
+          <dd id="bd-hoa" data-bind="hoa">{formatUSD(breakdown.hoa)}</dd>
+        </div>
+        <div class="breakdown-row breakdown-subtotal">
+          <dt>Lender-counted payment (P&amp;I + tax + insurance + PMI + HOA)</dt>
+          <dd id="bd-lender-total" data-bind="lenderTotal">{formatUSD(breakdown.lenderMonthlyPayment)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>
+            Maintenance reserve (1%/yr) <a class="info-link" href="/methodology#maintenance" aria-label="Why this matters">?</a>
+          </dt>
+          <dd id="bd-maintenance" data-bind="maintenance">{formatUSD(breakdown.maintenance)}</dd>
+        </div>
+        <div class="breakdown-row breakdown-total">
+          <dt>True monthly cost</dt>
+          <dd id="bd-sustainable-total" data-bind="sustainableTotal">{formatUSD(breakdown.sustainableMonthlyPayment)}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class={`callout leftover-callout ${affordability.householdCanSustain ? "callout-positive" : "callout-negative"}`} id="leftover-callout">
+      <p class="stat-label">Left over each month after this payment, other debts, and real-life expenses</p>
+      <p class="stat-value" id="leftover-amount" data-bind="leftoverAmount">
+        {formatSignedUSD(affordability.leftoverIncome)}
+      </p>
+      <p class="leftover-message" id="leftover-message">
+        {affordability.householdCanSustain
+          ? "This household clears both the lender's ratios and a real monthly budget."
+          : "This household would run a monthly deficit at this price — even though a lender may still approve it."}
+      </p>
+    </div>
+
+    {
+      results.constraints.length > 0 && (
+        <div class="constraints" id="constraints-block">
+          <p class="section-heading">What's driving this</p>
+          <ul id="constraints-list">
+            {results.constraints.map((c) => (
+              <li data-constraint-id={c.id}>{c.description}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    <div class="sensitivity" id="sensitivity-panel">
+      <p class="section-heading">What would change this <a class="info-link" href="/methodology#sensitivity" aria-label="Why this matters">?</a></p>
+      <div class="sensitivity-grid">
+        <div class="sensitivity-card">
+          <p class="sensitivity-label">Interest rate ±1 point</p>
+          <p class="sensitivity-value" id="sens-rate" data-bind="sensRate">
+            {formatUSD(sensitivity.rate.minusOnePoint)} · {formatUSD(sensitivity.rate.current)} · {formatUSD(sensitivity.rate.plusOnePoint)}
+          </p>
+          <p class="sensitivity-note">Max affordable price a point lower, at today's rate, and a point higher.</p>
+        </div>
+        <div class="sensitivity-card">
+          <p class="sensitivity-label">If income dropped 20%</p>
+          <p class="sensitivity-value" id="sens-income" data-bind="sensIncome">
+            {tierLabels[sensitivity.incomeDrop.currentTier]} → {tierLabels[sensitivity.incomeDrop.droppedTier]}
+          </p>
+          <p class="sensitivity-note" id="sens-income-note">At {formatUSD(sensitivity.incomeDrop.droppedGrossMonthlyIncome)}/mo gross, holding this home price constant.</p>
+        </div>
+        <div class="sensitivity-card">
+          <p class="sensitivity-label">If adding a child</p>
+          <p class="sensitivity-value" id="sens-child" data-bind="sensChild">
+            {tierLabels[sensitivity.addingChild.currentTier]} → {tierLabels[sensitivity.addingChild.withChildTier]}
+          </p>
+          <p class="sensitivity-note">Assumes +{formatUSD(sensitivity.addingChild.addedMonthlyCost)}/mo in childcare, a national-average illustrative figure.</p>
+        </div>
+        <div class="sensitivity-card">
+          <p class="sensitivity-label">With ${(20_000).toLocaleString()} more down</p>
+          <p class="sensitivity-value" id="sens-downpayment" data-bind="sensDownPayment">
+            {formatUSD(sensitivity.downPayment.currentTotalMonthly)} → {formatUSD(sensitivity.downPayment.largerTotalMonthly)}/mo
+          </p>
+          <p class="sensitivity-note" id="sens-downpayment-note">
+            PMI: {formatUSD(sensitivity.downPayment.currentPmiMonthly)} → {formatUSD(sensitivity.downPayment.largerPmiMonthly)}/mo
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="share-row">
+      <label class="field">
+        <span>Share this exact scenario</span>
+        <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
+      </label>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initCalculator } from "../../scripts/calculatorClient";
+  initCalculator();
+</script>
+
+<style>
+  .calculator {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .calculator {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .calculator-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: sticky;
+    top: var(--space-lg);
+  }
+
+  @media (max-width: 900px) {
+    .calculator-form {
+      position: static;
+    }
+  }
+
+  .field-group {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .field-group legend {
+    font-size: var(--text-label-sm-size);
+    font-weight: 600;
+    padding: 0 var(--space-xs);
+    color: var(--color-ink);
+  }
+
+  .field-group-note {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-top: calc(-1 * var(--space-xs));
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+    font-size: var(--text-body-sm-size);
+    color: var(--color-body);
+  }
+
+  .field input,
+  .field select {
+    background: var(--color-canvas-elevated);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-sm);
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .field-inline {
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: var(--text-body-sm-size);
+  }
+
+  .field-inline legend {
+    font-weight: 500;
+    padding: 0;
+  }
+
+  .field-inline label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    min-height: 44px;
+  }
+
+  .info-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-hairline);
+    font-size: 11px;
+    text-decoration: none;
+    color: var(--color-mute);
+  }
+
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .results-header h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    line-height: var(--text-heading-lg-leading);
+  }
+
+  .tier-badge {
+    display: inline-block;
+    padding: var(--space-xxs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--text-label-sm-size);
+    font-weight: 600;
+    vertical-align: middle;
+  }
+
+  .tier-badge[data-tier="comfortable"] {
+    background: var(--color-comfortable-soft);
+    color: var(--color-comfortable);
+  }
+  .tier-badge[data-tier="stretch"] {
+    background: var(--color-stretch-soft);
+    color: var(--color-stretch);
+  }
+  .tier-badge[data-tier="risky"] {
+    background: var(--color-risky-soft);
+    color: var(--color-risky);
+  }
+  .tier-badge[data-tier="unaffordable"] {
+    background: var(--color-unaffordable-soft);
+    color: var(--color-unaffordable);
+  }
+
+  .evaluate-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .evaluate-row .field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .callout {
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .callout-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
+
+  .callout-unaffordable {
+    background: var(--color-unaffordable-soft);
+    border-color: transparent;
+  }
+
+  .callout-unaffordable ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .lender-vs-sustainable {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (max-width: 480px) {
+    .lender-vs-sustainable {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-block {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+
+  .stat-label {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .stat-value {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+  }
+
+  .gap-explanation {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-body);
+  }
+
+  .section-heading {
+    font-weight: 600;
+    font-size: var(--text-label-sm-size);
+    margin-bottom: var(--space-xs);
+  }
+
+  .breakdown-list {
+    margin: 0;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-hairline-soft);
+  }
+
+  .breakdown-row dt {
+    color: var(--color-body);
+    font-size: var(--text-body-sm-size);
+  }
+
+  .dt-note {
+    color: var(--color-mute);
+  }
+
+  .breakdown-row dd {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .breakdown-subtotal {
+    background: var(--color-hairline-soft);
+  }
+
+  .breakdown-total {
+    background: var(--color-ink);
+  }
+
+  .breakdown-total dt,
+  .breakdown-total dd {
+    color: var(--color-on-ink);
+    font-weight: 600;
+  }
+
+  .leftover-callout.callout-positive {
+    background: var(--color-comfortable-soft);
+  }
+
+  .leftover-callout.callout-negative {
+    background: var(--color-unaffordable-soft);
+  }
+
+  .leftover-message {
+    font-size: var(--text-body-sm-size);
+    margin-top: var(--space-xxs);
+  }
+
+  .constraints ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: var(--text-body-md-size);
+    color: var(--color-body);
+  }
+
+  .sensitivity-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+
+  @media (max-width: 480px) {
+    .sensitivity-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .sensitivity-card {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .sensitivity-label {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .sensitivity-value {
+    font-weight: 600;
+  }
+
+  .sensitivity-note {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-top: var(--space-xxs);
+  }
+
+  .share-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    border-top: 1px solid var(--color-hairline);
+    padding-top: var(--space-lg);
+  }
+
+  .share-row .field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .copy-confirmation {
+    color: var(--color-comfortable);
+    font-size: var(--text-body-sm-size);
+    align-self: center;
+  }
+
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  .btn-primary-sm,
+  .btn-ghost-sm {
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-sm);
+    min-height: 44px;
+    font-size: var(--text-button-md-size);
+    font-weight: var(--text-button-md-weight);
+    cursor: pointer;
+  }
+
+  .btn-primary-sm {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    border: none;
+  }
+
+  .btn-ghost-sm {
+    background: var(--color-canvas-elevated);
+    color: var(--color-ink);
+    border: 1px solid var(--color-hairline);
+  }
+</style>

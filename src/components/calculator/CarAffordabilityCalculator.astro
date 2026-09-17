@@ -1,0 +1,291 @@
+---
+import { decodeScenario, scenarioToQueryString } from "../../lib/state/serialize";
+import { computeCarResults } from "../../lib/state/computeCarResults";
+import { getDefaultAutoLoanRate, BASE_RATE_AS_OF as AUTO_RATE_AS_OF } from "../../lib/data/auto-loan-rates-by-credit-band";
+import { AUTO_SALES_TAX_BY_STATE } from "../../lib/data/auto-sales-tax-by-state";
+import { CREDIT_BANDS } from "../../lib/data/pmi-rates";
+import { formatUSD, formatSignedUSD } from "../../lib/format";
+import ScaleBar from "./ScaleBar.astro";
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeCarResults(scenario);
+const { affordability } = results;
+const { breakdown } = affordability;
+
+const stateList = Object.values(AUTO_SALES_TAX_BY_STATE).sort((a, b) => a.state.localeCompare(b.state));
+const defaultRatePct = getDefaultAutoLoanRate(scenario.carCreditBand) * 100;
+const termOptions = [36, 48, 60, 72] as const;
+
+const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), Astro.site ?? Astro.url.origin).toString();
+
+const tierLabels: Record<string, string> = {
+  comfortable: "Comfortable",
+  stretch: "Stretch",
+  risky: "Risky",
+  unaffordable: "Unaffordable",
+};
+
+const ruleVsSustainableGap = results.ruleVsSustainableGap;
+---
+
+<div class="calculator-grid" data-car-calculator>
+  <form id="car-form" class="calculator-form-col" method="get">
+    <fieldset class="field-group">
+      <legend>Income &amp; debts</legend>
+      <label class="field">
+        <span>Annual household income (gross)</span>
+        <input type="number" inputmode="numeric" name="gi" id="field-gi" min="0" step="1000" value={scenario.grossAnnualIncome} />
+      </label>
+      <label class="field">
+        <span>Monthly take-home pay (net)</span>
+        <input type="number" inputmode="numeric" name="ni" id="field-ni" min="0" step="50" value={scenario.netMonthlyIncome} />
+      </label>
+      <label class="field">
+        <span>Other monthly debt payments</span>
+        <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Real-life monthly expenses</legend>
+      <p class="field-group-note">Lenders don't count these against you — but they determine whether the car payment actually fits.</p>
+      <label class="field">
+        <span>Childcare</span>
+        <input type="number" inputmode="numeric" name="ec" id="field-ec" min="0" step="25" value={scenario.childcare} />
+      </label>
+      <label class="field">
+        <span>Healthcare</span>
+        <input type="number" inputmode="numeric" name="eh" id="field-eh" min="0" step="25" value={scenario.healthcare} />
+      </label>
+      <label class="field">
+        <span>Groceries</span>
+        <input type="number" inputmode="numeric" name="eg" id="field-eg" min="0" step="25" value={scenario.groceries} />
+      </label>
+      <label class="field">
+        <span>Transport</span>
+        <input type="number" inputmode="numeric" name="et" id="field-et" min="0" step="25" value={scenario.transport} />
+      </label>
+      <label class="field">
+        <span>Other</span>
+        <input type="number" inputmode="numeric" name="eo" id="field-eo" min="0" step="25" value={scenario.otherExpenses} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Car &amp; loan assumptions</legend>
+
+      <label class="field">
+        <span>State (for sales tax)</span>
+        <select name="st" id="field-st">
+          {
+            stateList.map((entry) => (
+              <option value={entry.stateCode} selected={entry.stateCode === scenario.stateCode}>
+                {entry.state}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Down payment</span>
+        <input type="number" inputmode="numeric" name="cdp" id="field-cdp" min="0" step="500" value={scenario.carDownPaymentDollars} />
+      </label>
+
+      <label class="field">
+        <span>Trade-in value</span>
+        <input type="number" inputmode="numeric" name="cti" id="field-cti" min="0" step="500" value={scenario.carTradeInValueDollars} />
+      </label>
+
+      <label class="field">
+        <span>Credit score band</span>
+        <select name="ccb" id="field-ccb">
+          {
+            CREDIT_BANDS.map((band) => (
+              <option value={band} selected={band === scenario.carCreditBand}>
+                {band}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Interest rate override (%) <a class="info-link" href="/methodology" aria-label="Why this matters">?</a></span>
+        <input
+          type="number"
+          inputmode="decimal"
+          name="cir"
+          id="field-cir"
+          min="0"
+          max="30"
+          step="0.05"
+          placeholder={defaultRatePct.toFixed(2)}
+          value={scenario.carInterestRateOverride !== undefined ? (scenario.carInterestRateOverride * 100).toFixed(2) : ""}
+        />
+      </label>
+
+      <fieldset class="field-inline">
+        <legend>Loan term</legend>
+        {
+          termOptions.map((months) => (
+            <label>
+              <input type="radio" name="ctm" value={months} checked={scenario.carTermMonths === months} /> {months}mo
+            </label>
+          ))
+        }
+      </fieldset>
+
+      <label class="field">
+        <span>Auto insurance (monthly)</span>
+        <input type="number" inputmode="numeric" name="cin" id="field-cin" min="0" step="10" value={scenario.carInsuranceMonthly} />
+      </label>
+    </fieldset>
+
+    <p class="rate-disclosure">Default auto loan rates shown are static baselines as of {AUTO_RATE_AS_OF}, not a live feed — override with your own quote for an exact number.</p>
+
+    <noscript>
+      <button type="submit" class="btn-primary">Calculate</button>
+    </noscript>
+  </form>
+
+  <div class="results-col" id="car-results" aria-live="polite">
+    <div>
+      <p class="eyebrow">Your result</p>
+      {
+        results.isUnaffordable ? (
+          <h2 id="car-headline" data-bind="headline">
+            Not affordable at this price yet
+          </h2>
+        ) : (
+          <h2 id="car-headline" data-bind="headline">
+            <span class="tier-badge" data-tier={affordability.tier} id="car-tier-badge">
+              {tierLabels[affordability.tier]}
+            </span>{" "}
+            — up to <strong id="car-evaluated-price" data-bind="evaluatedPrice">{formatUSD(results.evaluatedPrice)}</strong>
+          </h2>
+        )
+      }
+    </div>
+
+    <ScaleBar comfortableMax={results.comfortableMax} stretchMax={results.stretchMax} riskyMax={results.riskyMax} evaluatedPrice={results.evaluatedPrice} />
+
+    <div class="evaluate-row">
+      <label class="field">
+        <span>Test a specific car price</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          name="cep"
+          id="field-cep"
+          form="car-form"
+          min="0"
+          step="500"
+          value={results.isCustomEvaluatedPrice ? results.evaluatedPrice : ""}
+          placeholder={String(results.defaultEvaluatedPrice)}
+        />
+      </label>
+      <button type="button" id="reset-evaluated-car-price" class="btn-ghost-sm" hidden={!results.isCustomEvaluatedPrice}>
+        Reset to recommended
+      </button>
+    </div>
+
+    <div class="two-col-stats">
+      <div class="stat-block">
+        <p class="stat-label">The 20/4/10 rule would allow up to</p>
+        <p class="stat-value" id="car-rule-max" data-bind="ruleMax">{formatUSD(results.riskyMax)}</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-label">You can actually sustain up to</p>
+        <p class="stat-value" id="car-sustainable-max" data-bind="sustainableMax">{formatUSD(results.sustainableMax)}</p>
+      </div>
+    </div>
+    <p class="gap-explanation" id="car-gap-explanation">
+      {ruleVsSustainableGap > 500
+        ? `That's a ${formatUSD(ruleVsSustainableGap)} gap — the rule of thumb allows more car than your household's real budget can comfortably carry.`
+        : "Your budget can support at least as much as the 20/4/10 rule's ceiling — the rule of thumb isn't what's holding you back here."}
+    </p>
+
+    <div class="breakdown">
+      <p class="section-heading">Cost breakdown at {formatUSD(results.evaluatedPrice)}</p>
+      <dl class="breakdown-list" id="car-breakdown-list">
+        <div class="breakdown-row">
+          <dt>Sales tax (financed into the loan)</dt>
+          <dd id="bd-car-tax" data-bind="carTax">{formatUSD(breakdown.salesTax)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>Amount financed</dt>
+          <dd id="bd-car-financed" data-bind="carFinanced">{formatUSD(breakdown.amountFinanced)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>Monthly principal &amp; interest</dt>
+          <dd id="bd-car-pi" data-bind="carPi">{formatUSD(breakdown.principalAndInterest)}</dd>
+        </div>
+        <div class="breakdown-row">
+          <dt>Monthly insurance</dt>
+          <dd id="bd-car-insurance" data-bind="carInsurance">{formatUSD(breakdown.insurance)}</dd>
+        </div>
+        <div class="breakdown-row breakdown-total">
+          <dt>Total monthly cost</dt>
+          <dd id="bd-car-total" data-bind="carTotal">{formatUSD(breakdown.totalMonthlyCost)}</dd>
+        </div>
+      </dl>
+      <p class="rule-explainer">Doesn't include fuel, maintenance, or registration — this is the financing cost only.</p>
+    </div>
+
+    <div class={`callout leftover-callout ${affordability.householdCanSustain ? "callout-positive" : "callout-negative"}`} id="car-leftover-callout">
+      <p class="stat-label">Left over each month after this car payment, other debts, and real-life expenses</p>
+      <p class="stat-value" id="car-leftover-amount" data-bind="carLeftoverAmount">{formatSignedUSD(affordability.leftoverIncome)}</p>
+      <p class="leftover-message" id="car-leftover-message">
+        {affordability.householdCanSustain
+          ? "This household clears both the 20/4/10-style ratio and a real monthly budget."
+          : "This household would run a monthly deficit at this price — even though it may look affordable by the ratio alone."}
+      </p>
+    </div>
+
+    <div class="share-row">
+      <label class="field">
+        <span>Share this exact scenario</span>
+        <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
+      </label>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initCarCalculator } from "../../scripts/carCalculatorClient";
+  initCarCalculator();
+</script>
+
+<style>
+  .rate-disclosure {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+  }
+
+  .rule-explainer {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-top: var(--space-xs);
+  }
+
+  .leftover-callout.callout-positive {
+    background: var(--color-comfortable-soft);
+  }
+
+  .leftover-callout.callout-negative {
+    background: var(--color-unaffordable-soft);
+  }
+
+  .leftover-message {
+    font-size: var(--text-body-sm-size);
+    margin-top: var(--space-xxs);
+  }
+
+  .gap-explanation {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-body);
+  }
+</style>

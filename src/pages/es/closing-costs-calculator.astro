@@ -1,0 +1,57 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import ClosingCostsCalculator from "../../components/calculator/ClosingCostsCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { estimateClosingCosts } from "../../lib/engine/closingCosts";
+import { formatUSD } from "../../lib/format";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const homePrice = scenario.evaluatedHomePrice ?? computeResults(scenario).defaultEvaluatedPrice;
+const closingCosts = estimateClosingCosts(homePrice, scenario.downPaymentDollars);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Costos de Cierre — El Efectivo Que Necesitas Más Allá del Enganche | TrueAfford";
+const description = "Los costos de cierre representan 2-5% del precio de la vivienda, pagados en efectivo además de tu enganche. Ve el rango para tu precio específico, señalado por separado para que no te tome por sorpresa.";
+
+const ogTitle = hasScenario ? `Costos de cierre típicos: ${formatUSD(closingCosts.typical)} en una vivienda de ${formatUSD(homePrice)} — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="closing-costs-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Costos de Cierre"
+    heading="El efectivo que necesitas más allá del enganche"
+    intro="Los costos de cierre son con frecuencia lo que descarrila a un comprador primerizo que solo presupuestó el enganche. Esto muestra el rango real en efectivo — de 2% a 5% del precio de la vivienda — encima de lo que ya estás apartando."
+    faqs={[
+      {
+        question: "¿Qué está realmente incluido en los costos de cierre?",
+        answer:
+          "Comisiones de originación del prestamista, seguro de título y honorarios de búsqueda, costos de avalúo e inspección, honorarios de registro, impuesto predial y seguro prepagados, y cargos únicos similares. La mezcla exacta varía según el estado y el prestamista, razón por la cual esto se muestra como un rango en lugar de un solo número.",
+      },
+      {
+        question: "¿Los costos de cierre se pueden incluir en el préstamo?",
+        answer:
+          "A veces, dependiendo del tipo de préstamo y del prestamista — pero eso aumenta el saldo de tu préstamo y el interés que pagas con el tiempo. Esta calculadora los trata como efectivo necesario al momento del cierre, que es el supuesto por defecto más conservador y más común.",
+      },
+      {
+        question: "¿Por qué un rango en lugar de un solo número?",
+        answer:
+          "Porque la cifra real depende de tu estado, tu prestamista y el tipo de préstamo de formas que una calculadora genérica no puede conocer con precisión. El rango de 2-5% es lo bastante amplio como para ser honesto sobre esa incertidumbre y aun así ser útil para presupuestar.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Calculadora de hipoteca" },
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "amortization-schedule-calculator"), label: "Calculadora de tabla de amortización" },
+    ]}
+  >
+    <ClosingCostsCalculator />
+  </CalculatorPageShell>
+</Layout>

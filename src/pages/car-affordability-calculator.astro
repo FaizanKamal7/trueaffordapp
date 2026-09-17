@@ -1,0 +1,62 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import CarAffordabilityCalculator from "../components/calculator/CarAffordabilityCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeCarResults } from "../lib/state/computeCarResults";
+import { formatUSD } from "../lib/format";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeCarResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Car Affordability Calculator — How Much Car You Can Actually Afford | TrueAfford";
+const description =
+  "A car affordability calculator built on the 20/4/10 rule, with real monthly cost including sales tax, loan interest by credit band, and insurance — plus a leftover-income test lenders don't run.";
+
+const ogTitle = hasScenario ? `This household can afford up to ${formatUSD(results.evaluatedPrice)} in a car — TrueAfford` : undefined;
+const ogDescription = hasScenario ? "See the full breakdown of the 20/4/10 rule, sales tax, loan cost, and whether the payment actually fits the budget." : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} ogDescription={ogDescription} locale={locale} translationSlug="car-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Car Affordability Calculator"
+    heading="How much car can you actually afford?"
+    intro="Dealers and lenders will approve you for more car than your budget can sustain. This calculator applies the 20/4/10 rule, then checks it against your real monthly budget — sales tax, loan interest for your credit band, and insurance all included."
+    faqs={[
+      {
+        question: "How much car can I afford based on my income?",
+        answer:
+          "As a starting point, this calculator uses the 20/4/10 rule: at least 20% down, a loan term of 4 years (48 months) or shorter, and total vehicle cost (loan payment plus insurance) at or under 10% of your gross monthly income. That's the Comfortable tier. Stretch and Risky widen that ceiling, the same way this site's other calculators widen past a lender's ideal ratio — but widening the ratio doesn't widen your actual bank account, which is why the leftover-income check exists.",
+      },
+      {
+        question: "What is the 20/4/10 rule?",
+        answer:
+          "A commonly-cited personal-finance rule of thumb for car buying: put at least 20% down, finance for no more than 4 years, and keep total monthly vehicle costs (payment plus insurance) at or under 10% of your gross monthly income. It's not a lending regulation — it's a conservative guideline, and this calculator uses it as the anchor for the Comfortable tier.",
+      },
+      {
+        question: "Does this include sales tax and insurance?",
+        answer:
+          "Yes. Sales tax is calculated using your state's typical combined rate on the price minus any trade-in value, then financed into the loan along with the rest of the purchase price minus your down payment and trade-in. Monthly insurance is a direct input, since premiums vary too much by driver, vehicle, and location to estimate from a table.",
+      },
+      {
+        question: "How is a car loan affordability calculator different from what a dealer or lender will approve?",
+        answer:
+          "A lender or dealer's finance desk is checking whether you qualify for a loan, not whether the payment leaves room in your budget for everything else. This calculator runs both: the 20/4/10-style rule most personal-finance guidance recommends, and a separate leftover-income test that subtracts your other debts and real monthly expenses to see if the payment is actually sustainable. The gap between the two is the number worth paying attention to.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "home affordability calculator" },
+      { href: localizedPath(locale, "mortgage-calculator"), label: "mortgage affordability calculator" },
+      { href: localizedPath(locale, "budget-calculator"), label: "monthly budget calculator" },
+    ]}
+  >
+    <CarAffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

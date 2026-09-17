@@ -1,0 +1,54 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const title = "Contact Us — TrueAfford";
+const description = "Get in touch with TrueAfford about a calculator result, a data source, or a bug.";
+const contactEmail = "support@trueaffordapp.com";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="contact-us">
+  <section class="container doc-hero">
+    <p class="eyebrow">Contact Us</p>
+    <h1>Get in touch</h1>
+    <p class="intro">There's no support chat and no ticket system — just email. Send a message and we'll get back to you.</p>
+  </section>
+
+  <section class="container doc-section" id="email">
+    <h2>Email</h2>
+    <p>
+      For questions about a calculator result, a data source that looks out of date, a bug, or anything else: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+    </p>
+    <a class="btn-primary" href={`mailto:${contactEmail}`}>Email us</a>
+  </section>
+
+  <section class="container doc-section" id="before-you-write">
+    <h2>Before you write in</h2>
+    <ul>
+      <li>Questions about how a number is calculated are usually answered on the <a href={localizedPath(locale, "methodology")}>methodology page</a>, which documents every formula, assumption, and data source.</li>
+      <li>This site can't give personalized financial or lending advice — it's a calculator, not an advisor.</li>
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .btn-primary {
+    display: inline-block;
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+    margin-top: var(--space-xs);
+  }
+
+  .btn-primary:hover {
+    text-decoration: none;
+  }
+</style>

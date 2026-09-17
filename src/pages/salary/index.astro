@@ -1,0 +1,84 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { formatUSD } from "../../lib/format";
+
+const MIN_INCOME = 40_000;
+const MAX_INCOME = 250_000;
+const STEP = 5_000;
+
+const incomes: number[] = [];
+for (let income = MIN_INCOME; income <= MAX_INCOME; income += STEP) {
+  incomes.push(income);
+}
+
+const title = "Home Affordability by Salary — Browse Every Income Level | TrueAfford";
+const description = "See what a household can typically afford at any salary from $40,000 to $250,000 a year, in $5,000 steps, using the same engine as the full calculator.";
+---
+
+<Layout title={title} description={description}>
+  <section class="container hero">
+    <p class="eyebrow">Home Affordability by Income</p>
+    <h1>Browse by salary</h1>
+    <p class="intro">Pick an income level to see a baseline affordability snapshot, or use the full calculator to enter your household's exact numbers.</p>
+  </section>
+
+  <section class="container section">
+    <ul class="income-list">
+      {
+        incomes.map((income) => (
+          <li>
+            <a href={`/salary/${income}`}>{formatUSD(income)}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .section {
+    padding-bottom: var(--space-3xl);
+  }
+
+  .income-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .income-list a {
+    display: block;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    color: var(--color-ink);
+    text-decoration: none;
+    font-size: var(--text-body-sm-size);
+  }
+
+  .income-list a:hover {
+    background: var(--color-hairline-soft);
+  }
+</style>

@@ -1,11 +1,930 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import Faq from "../components/layout/Faq.astro";
+import { localizedPath } from "../i18n/locales";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const locale = "en" as const;
+
+const title = "TrueAfford — The Affordability Calculator With Nothing to Sell You";
+const description =
+  "Most home affordability calculators are owned by companies that sell mortgage leads. This one isn't — real expenses, state tax and insurance, no ads.";
+
+const categories = [
+  {
+    index: "01",
+    name: "Buying a home",
+    blurb: "The core decision — price, payment, and the costs that show up after closing.",
+    tools: [
+      {
+        href: localizedPath(locale, "home-affordability-calculator"),
+        title: "Home Affordability Calculator",
+        description: "How much house your income, debts, and real expenses can actually support.",
+        size: "featured",
+      },
+      {
+        href: localizedPath(locale, "mortgage-calculator"),
+        title: "Mortgage Calculator",
+        description: "The full monthly payment breakdown for a specific price, rate, and down payment.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "house-affordability-calculator"),
+        title: "House Affordability Calculator",
+        description: "The true cost of owning, including the maintenance reserve most calculators skip.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "closing-costs-calculator"),
+        title: "Closing Costs Calculator",
+        description: "The cash you need beyond the down payment — 2% to 5% of the home price.",
+        size: "compact",
+      },
+      {
+        href: localizedPath(locale, "amortization-schedule-calculator"),
+        title: "Amortization Schedule Calculator",
+        description: "What an extra payment actually does to your loan, year by year.",
+        size: "compact",
+      },
+    ],
+  },
+  {
+    index: "02",
+    name: "Renting",
+    blurb: "Same rigor as buying: what you can afford, and whether buying would actually win.",
+    tools: [
+      {
+        href: localizedPath(locale, "rent-affordability-calculator"),
+        title: "Rent Affordability Calculator",
+        description: "What you can actually afford to rent, checked against three rules, not just one.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "rent-vs-buy-calculator"),
+        title: "Rent vs. Buy Calculator",
+        description: "A month-by-month net-worth simulation — see when buying actually pulls ahead.",
+        size: "medium",
+      },
+    ],
+  },
+  {
+    index: "03",
+    name: "Budgeting & other big purchases",
+    blurb: "Where housing fits in your budget, and the other big loan people underestimate.",
+    tools: [
+      {
+        href: localizedPath(locale, "budget-calculator"),
+        title: "Monthly Budget Calculator",
+        description: "See where your real housing payment fits inside the 50/30/20 rule.",
+        size: "medium",
+      },
+      {
+        href: localizedPath(locale, "car-affordability-calculator"),
+        title: "Car Affordability Calculator",
+        description: "How much car you can afford under the 20/4/10 rule, with sales tax and insurance included.",
+        size: "medium",
+      },
+    ],
+  },
+];
+
+const whyItems = [
+  {
+    title: "Real expenses, not just debt",
+    body: "Childcare, healthcare, groceries, and transport all have dedicated fields — not a footnote telling you to stuff them into a \"monthly debts\" box.",
+  },
+  {
+    title: "Your state, not a national average",
+    body: "Property tax alone ranges from roughly 0.27% to 2.2% of home value depending on where you live. This calculator uses your state's rate, not a blended guess.",
+  },
+  {
+    title: "A maintenance reserve, included by default",
+    body: "1% of home value a year, budgeted automatically — a real cost of ownership every other calculator quietly leaves out.",
+  },
+  {
+    title: "Lender-approval vs. sustainable, side by side",
+    body: "What a lender will likely approve and what your household can actually sustain are often different numbers. This is the only calculator that names the gap.",
+  },
+];
+
+const faqs = [
+  {
+    question: "How much house can I afford?",
+    answer:
+      "It depends on your gross income, existing debts, down payment, interest rate, and your state's property tax and insurance rates — but also on real monthly costs like childcare, groceries, healthcare, and transportation that most calculators ignore. The Home Affordability Calculator gives you three answers instead of one: a Comfortable price that leaves a real cushion, a Stretch price that's tighter but sustainable, and a Risky price — the most a lender's ratios alone would approve.",
+  },
+  {
+    question: "What is the best home affordability calculator?",
+    answer:
+      "The best one counts your actual monthly expenses, not just debt payments, and uses your state's property tax and insurance rates instead of a national average. It should also show you two numbers — what a lender would likely approve and what your household can actually sustain — instead of a single flattering figure. TrueAfford does both, and it doesn't carry lender ads or sell your information, since there's no lead-gen business behind it.",
+  },
+  {
+    question: "Which home affordability calculator should I use?",
+    answer:
+      "Use one that separates lender approval from household sustainability, and that lets you enter real expenses — childcare, groceries, healthcare, transportation — rather than lumping everything into a single \"monthly debts\" field. If a calculator only asks for income and debts, it's only giving you half the picture. This one asks for both and shows the gap.",
+  },
+  {
+    question: "How do I use a home loan affordability calculator?",
+    answer:
+      "Enter your gross annual income, monthly debt payments (car loans, student loans, credit cards), your planned down payment, and the state you're buying in. Add your real monthly expenses — childcare, groceries, healthcare, transportation — if the calculator supports them. The result should show a maximum home price along with the assumptions behind it, ideally broken into a lender-approval figure and a household-sustainable figure rather than one number.",
+  },
+  {
+    question: "How does a home affordability calculator work?",
+    answer:
+      "Most calculators apply lender debt-to-income ratios — typically capping housing costs at around 28% of gross income (front-end ratio) and total debt at around 36-43% (back-end ratio) — then solve for the home price those limits allow. TrueAfford does that, but also runs a separate test: it subtracts your real monthly expenses from your income to see what your household can actually sustain, then reports both results side by side.",
+  },
+  {
+    question: "I make $70,000 a year, how much house can I afford?",
+    answer:
+      "At $70,000 a year (about $5,833/month gross), a standard 28% front-end ratio puts your housing budget around $1,630/month, which — depending on your interest rate, down payment, property tax, and insurance — often lands in the roughly $220,000–$280,000 home price range. That figure moves a lot based on your existing debts, down payment size, and real monthly expenses, so it's worth entering your actual numbers into the calculator rather than relying on a rule of thumb.",
+  },
+  {
+    question: "How much can I afford to buy a house?",
+    answer:
+      "Start with your gross income and subtract existing debt payments to see what a lender's ratios would allow — then subtract your real monthly expenses (childcare, groceries, healthcare, transportation) to see what your budget can actually sustain. The gap between those two numbers is often larger than people expect. Use the Home Affordability Calculator to get both figures using your actual income, debts, down payment, and state.",
+  },
+  {
+    question: "How does TrueAfford work?",
+    answer:
+      "You enter your income, debts, down payment, and real monthly expenses, along with the state you're buying in. TrueAfford runs your numbers through standard lender debt-to-income ratios to find what you'd likely be approved for, then runs a second, independent test against your actual budget to find what you can sustain without strain. It shows both as Comfortable, Stretch, and Risky price ranges, using your state's specific property tax and insurance rates rather than a national average — with no account, no email, and no ads in the result.",
+  },
+  {
+    question: "Why is TrueAfford free?",
+    answer:
+      "Most home affordability calculators are built by companies that make money when you apply for a loan, click a lender ad, or hand over your contact information — so a bigger approved number serves their business even when it doesn't serve yours. TrueAfford doesn't sell leads, ads, or your data, so there's no incentive to inflate the result, and no cost to running a calculator that does the same arithmetic every other one does.",
+  },
+];
+
+const homeHref = localizedPath(locale, "home-affordability-calculator");
+const methodologyHref = localizedPath(locale, "methodology");
+const houseHref = localizedPath(locale, "house-affordability-calculator");
+const mortgageHref = localizedPath(locale, "mortgage-calculator");
+const rentHref = localizedPath(locale, "rent-affordability-calculator");
+const budgetHref = localizedPath(locale, "budget-calculator");
+const carHref = localizedPath(locale, "car-affordability-calculator");
 ---
 
-<Layout>
-	<Welcome />
+<Layout title={title} description={description} locale={locale} translationSlug="">
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="eyebrow hero-eyebrow">TrueAfford</p>
+      <h1 class="hero-heading">The affordability calculator<br />with nothing to sell you</h1>
+      <p class="intro hero-intro">
+        NerdWallet's calculator carries lender ads next to your result. Zillow wants you browsing listings. Rocket Mortgage wants an application. None of them profit from telling you the number is smaller than you hoped
+        — this one has no leads to sell, so it doesn't need to.
+      </p>
+      <div class="hero-cta-row">
+        <a class="btn-primary" href={homeHref}>Calculate what you can afford</a>
+      </div>
+      <p class="hero-facts">No account &middot; No lender ads &middot; Free</p>
+
+      <div class="hero-figure">
+        <div class="hero-figure-blob" aria-hidden="true"></div>
+        <img class="hero-figure-img" src="/hero-illustration.svg" alt="Illustration of a person reviewing their home affordability numbers" width="1200" height="1200" loading="eager" />
+        <div class="hero-figure-ground" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-band">
+    <div class="container">
+      {
+        categories.map((category) => {
+          const featured = category.tools.filter((t) => t.size === "featured");
+          const medium = category.tools.filter((t) => t.size === "medium");
+          const compact = category.tools.filter((t) => t.size === "compact");
+          return (
+            <div class="category">
+              <div class="category-header">
+                <p class="category-index">{category.index}</p>
+                <div>
+                  <h2>{category.name}</h2>
+                  <p class="category-blurb">{category.blurb}</p>
+                </div>
+              </div>
+
+              <div class="category-tools">
+                {featured.length > 0 && (
+                  <div class="tool-featured-wrap">
+                    {featured.map((tool) => (
+                      <a class="tool-featured" href={tool.href}>
+                        <div class="tool-featured-text">
+                          <p class="tool-kicker">Start here</p>
+                          <p class="tool-title">{tool.title}</p>
+                          <p class="tool-description">{tool.description}</p>
+                          <span class="tool-arrow">
+                            Calculate <span aria-hidden="true">→</span>
+                          </span>
+                        </div>
+                        <div class="tool-featured-visual" aria-hidden="true">
+                          <div class="tier-bar">
+                            <span class="tier-zone tier-comfortable" style="width:45%" />
+                            <span class="tier-zone tier-stretch" style="width:30%" />
+                            <span class="tier-zone tier-risky" style="width:15%" />
+                            <span class="tier-zone tier-beyond" style="width:10%" />
+                          </div>
+                          <div class="tier-labels">
+                            <span>Comfortable</span>
+                            <span>Stretch</span>
+                            <span>Risky</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {medium.length > 0 && (
+                  <div class="tool-medium-grid">
+                    {medium.map((tool) => (
+                      <a class="tool-medium" href={tool.href}>
+                        <p class="tool-title">{tool.title}</p>
+                        <p class="tool-description">{tool.description}</p>
+                        <span class="tool-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {compact.length > 0 && (
+                  <div class="tool-compact-list">
+                    {compact.map((tool) => (
+                      <a class="tool-compact" href={tool.href}>
+                        <span class="tool-compact-title">{tool.title}</span>
+                        <span class="tool-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section class="container why">
+    <div class="why-grid">
+      <div class="why-heading">
+        <p class="eyebrow">The difference</p>
+        <h2>Why the number is usually smaller here</h2>
+        <a class="methodology-link" href={methodologyHref}>Read the full methodology →</a>
+      </div>
+      <ol class="why-list">
+        {
+          whyItems.map((item, i) => (
+            <li>
+              <span class="why-index" aria-hidden="true">
+                {String.fromCharCode(97 + i)}
+              </span>
+              <div>
+                <p class="why-title">{item.title}</p>
+                <p>{item.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="container about">
+    <p class="eyebrow">Why this exists</p>
+    <h2>What an affordability calculator actually needs to tell you</h2>
+    <p class="lede">
+      Type "how much house can I afford" into a search bar and you'll land on a dozen affordability calculators, most of them built by a company that profits the moment you apply for a loan. An affordability calculator is
+      supposed to answer one honest question — what can your household actually pay every month, for years, without strain — and yet the incentives of the companies that build them push the other way: bigger approved
+      amounts mean bigger commissions, bigger ad impressions, bigger lead-gen fees. TrueAfford exists because that question deserves an answer nobody profits from bending.
+    </p>
+
+    <h3>Home, house, or mortgage affordability — same question</h3>
+    <p>
+      Whatever you call the tool you're searching for, it's answering one question: take your income, subtract your debts and real expenses, apply a lender's ratio limits, and solve for the largest home price the result
+      supports. The differences between these tools aren't in the label; they're in what gets counted. A calculator that ignores childcare, groceries, and healthcare will always show a bigger number than one that doesn't,
+      which is exactly why so many of them do.
+    </p>
+    <p>
+      Before you buy a house, the number that matters isn't what a lender is willing to approve — it's what your household can pay in a slow month, after a car repair, without touching savings. That's the gap this site is
+      built around: a lender-approval figure and a sustainable figure, shown side by side on the <a href={homeHref}>Home Affordability Calculator</a>, the
+      <a href={houseHref}>House Affordability Calculator</a>, and the <a href={mortgageHref}>Mortgage Calculator</a>, each pulling state-specific property tax and insurance rates instead of a
+      blended national average. House affordability and mortgage affordability aren't one number — they're a range, and knowing where Comfortable ends and Risky begins is worth more than any single figure a calculator
+      hands you.
+    </p>
+
+    <h3>Renting and budgeting fit the same math</h3>
+    <p>
+      Not everyone in the market to buy should buy, and this site treats renting with the same rigor. The <a href={rentHref}>Rent Affordability Calculator</a> checks three independent rules — the
+      30%-of-income guideline, the 40x-annual-income screening test landlords actually use, and a leftover-income test after real expenses — and reports whichever one is strictest, not whichever one is most flattering. Once
+      you have a housing number, whether it's a mortgage payment or rent, the <a href={budgetHref}>Monthly Budget Calculator</a> maps it onto the 50/30/20 rule automatically, using the same income and expense
+      figures you already entered, so needs, wants, and savings are never a separate spreadsheet.
+    </p>
+
+    <h3>Car loan affordability deserves the same rigor as house loan affordability</h3>
+    <p>
+      Housing is usually the largest recurring cost a household carries, but for most people a car loan runs a close second — and car loan affordability gets almost none of the scrutiny that house loan affordability does.
+      The <a href={carHref}>Car Affordability Calculator</a> applies the same standard here: the widely-cited 20/4/10 rule (20% down, four years or less, no more than 10% of gross income), plus state
+      sales tax and a real insurance estimate, plus the leftover-income check that separates what a dealer will finance from what your budget can actually sustain. Whether the debt is a mortgage or an auto loan, the
+      discipline should be identical — check it against real income and real expenses, not a lender's most optimistic ratio.
+    </p>
+    <p>
+      None of these calculators require an account, a phone number, or an email address, and none of them show you a lender ad next to your result — there's simply nothing here to sell. Every formula, every data source,
+      and every assumption is documented in full on the <a href={methodologyHref}>methodology page</a>, dated and sourced, so you can verify the math instead of trusting a black box. Run the numbers, see exactly why they came
+      out the way they did, and use the answer to negotiate from a position you actually understand.
+    </p>
+  </section>
+
+  <Faq eyebrow="Common questions" faqs={faqs} locale={locale} />
+
+  <section class="cta-band">
+    <div class="container cta-inner">
+      <p class="eyebrow">Ready when you are</p>
+      <h2>Get your number in under three minutes.</h2>
+      <p>No account. No ads next to your result. No lender calling you tomorrow.</p>
+      <a class="btn-inverse" href={homeHref}>Calculate what you can afford</a>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    background:
+      radial-gradient(circle at 78% 42%, var(--color-nav-glow) 0, transparent 34%),
+      linear-gradient(120deg, var(--color-nav-start) 0%, var(--color-nav-middle) 52%, var(--color-nav-end) 100%);
+    border-bottom: 1px solid var(--color-nav-border);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .hero-inner {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-areas:
+      "eyebrow"
+      "heading"
+      "figure"
+      "intro"
+      "cta"
+      "facts";
+  }
+
+  @media (min-width: 1024px) {
+    .hero-inner {
+      grid-template-columns: 1.05fr 1fr;
+      grid-template-areas:
+        "eyebrow figure"
+        "heading figure"
+        "intro   figure"
+        "cta     figure"
+        "facts   figure";
+      align-items: center;
+      gap: var(--space-2xl);
+      padding-block: var(--space-xl) 0;
+    }
+  }
+
+  .hero-eyebrow {
+    grid-area: eyebrow;
+  }
+
+  .hero-heading {
+    grid-area: heading;
+    font-size: var(--text-display-xl-size);
+    font-weight: var(--text-display-xl-weight);
+    line-height: var(--text-display-xl-leading);
+    letter-spacing: var(--text-display-xl-tracking);
+    margin-block: var(--space-sm) 0;
+  }
+
+  @media (max-width: 640px) {
+    .hero-heading {
+      font-size: 32px;
+      line-height: 40px;
+      letter-spacing: -1.28px;
+    }
+  }
+
+  .hero-intro {
+    grid-area: intro;
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+    max-width: 52ch;
+  }
+
+  .hero-cta-row {
+    grid-area: cta;
+  }
+
+  .hero-facts {
+    grid-area: facts;
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+  }
+
+  .hero-figure {
+    grid-area: figure;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-figure-blob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 260px;
+    background: color-mix(in srgb, var(--color-nav-end) 62%, transparent);
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    transform: translate(-50%, -55%);
+    z-index: 0;
+  }
+
+  .hero-figure-ground {
+    position: absolute;
+    bottom: 6%;
+    left: 18%;
+    right: 18%;
+    height: 1px;
+    background: var(--color-hairline);
+    z-index: 0;
+  }
+
+  .hero-figure-img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-figure-blob {
+      width: 340px;
+      height: 340px;
+    }
+
+    .hero-figure-img {
+      max-width: 400px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .hero-figure {
+      margin-right: -48px;
+      justify-content: flex-end;
+    }
+
+    .hero-figure-img {
+      max-width: 460px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-figure-img {
+      animation: hero-float 7s ease-in-out infinite;
+    }
+  }
+
+  @keyframes hero-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  /* Tools band */
+  .tools-band {
+    background: var(--color-hairline-soft);
+    border-block: 1px solid var(--color-hairline);
+    padding-block: var(--space-2xl) var(--space-3xl);
+  }
+
+  .category-header {
+    display: flex;
+    gap: var(--space-md);
+    align-items: baseline;
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--color-hairline);
+    margin-bottom: var(--space-lg);
+  }
+
+  .category:first-child .category-header {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .category-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-eyebrow-size);
+    color: var(--color-faint);
+    flex-shrink: 0;
+  }
+
+  .category-header h2 {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+    line-height: var(--text-heading-md-leading);
+    letter-spacing: var(--text-heading-md-tracking);
+  }
+
+  .category-blurb {
+    color: var(--color-mute);
+    font-size: var(--text-body-sm-size);
+    margin-top: 2px;
+  }
+
+  .category-tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .tool-title {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+    margin-bottom: var(--space-xxs);
+  }
+
+  .tool-description {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+  }
+
+  .tool-arrow {
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tool-arrow span {
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  /* Featured tool */
+  .tool-featured {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    background: var(--color-canvas-elevated);
+    padding: var(--space-xl);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+  }
+
+  .tool-featured:hover {
+    border-color: var(--color-ink);
+  }
+
+  .tool-featured:hover .tool-arrow span {
+    transform: translateX(3px);
+  }
+
+  .tool-featured-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tool-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-mute);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .tool-featured .tool-description {
+    max-width: 46ch;
+    margin-bottom: var(--space-md);
+  }
+
+  .tool-featured-visual {
+    width: 220px;
+    flex-shrink: 0;
+  }
+
+  .tier-bar {
+    display: flex;
+    height: 10px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--color-hairline);
+    margin-bottom: var(--space-xs);
+  }
+
+  .tier-zone {
+    height: 100%;
+  }
+
+  .tier-comfortable {
+    background: var(--color-comfortable);
+  }
+
+  .tier-stretch {
+    background: var(--color-stretch);
+  }
+
+  .tier-risky {
+    background: var(--color-risky);
+  }
+
+  .tier-beyond {
+    background: var(--color-hairline);
+  }
+
+  .tier-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-mute);
+  }
+
+  @media (max-width: 900px) {
+    .tool-featured {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .tool-featured-visual {
+      width: 100%;
+    }
+  }
+
+  /* Medium tools */
+  .tool-medium-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  @media (max-width: 640px) {
+    .tool-medium-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tool-medium {
+    display: block;
+    position: relative;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    padding-right: var(--space-2xl);
+    text-decoration: none;
+    color: inherit;
+    background: var(--color-canvas-elevated);
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .tool-medium:hover {
+    border-color: var(--color-ink);
+    background: var(--color-hairline-soft);
+  }
+
+  .tool-medium .tool-arrow {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    color: var(--color-mute);
+  }
+
+  .tool-medium:hover .tool-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Compact tools */
+  .tool-compact-list {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-canvas-elevated);
+  }
+
+  .tool-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    min-height: 44px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--color-hairline-soft);
+  }
+
+  .tool-compact:last-child {
+    border-bottom: none;
+  }
+
+  .tool-compact:hover {
+    background: var(--color-hairline-soft);
+  }
+
+  .tool-compact:hover .tool-arrow {
+    transform: translateX(3px);
+  }
+
+  .tool-compact-title {
+    font-size: var(--text-body-md-size);
+    font-weight: 500;
+  }
+
+  /* Why section */
+  .why {
+    padding-block: var(--space-4xl);
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    gap: var(--space-2xl);
+  }
+
+  @media (max-width: 900px) {
+    .why-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .why-heading h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    line-height: var(--text-heading-lg-leading);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .methodology-link {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .methodology-link:hover {
+    text-decoration: underline;
+  }
+
+  .why-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .why-list li {
+    display: flex;
+    gap: var(--space-md);
+    padding-block: var(--space-lg);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .why-list li:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .why-index {
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm-size);
+    color: var(--color-faint);
+    flex-shrink: 0;
+    padding-top: 3px;
+  }
+
+  .why-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xxs);
+    color: var(--color-ink);
+  }
+
+  .why-list p:not(.why-title) {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+  }
+
+  /* About */
+  .about {
+    max-width: 760px;
+    padding-bottom: var(--space-3xl);
+  }
+
+  .about h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    line-height: var(--text-heading-lg-leading);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .about h3 {
+    font-size: var(--text-heading-md-size);
+    font-weight: var(--text-heading-md-weight);
+    line-height: var(--text-heading-md-leading);
+    border-top: 1px solid var(--color-hairline);
+    padding-top: var(--space-lg);
+    margin-block: var(--space-2xl) var(--space-xs);
+  }
+
+  .about p {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+    margin-bottom: var(--space-md);
+  }
+
+  .about .lede {
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+    color: var(--color-body);
+  }
+
+  .about a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .about a:hover {
+    text-decoration: underline;
+  }
+
+  /* Closing CTA band */
+  .cta-band {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    padding-block: var(--space-4xl);
+  }
+
+  .cta-inner {
+    max-width: 640px;
+  }
+
+  .cta-band .eyebrow {
+    color: var(--color-on-ink-muted);
+  }
+
+  .cta-band h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: 600;
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-sm);
+  }
+
+  .cta-band p {
+    color: var(--color-on-ink-muted);
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-lg);
+  }
+
+  /* The dark theme reverses this CTA to a light surface. Keep its supporting
+     copy explicitly dark, including the eyebrow which is otherwise muted. */
+  :global(html[data-theme="dark"]) .cta-band .eyebrow,
+  :global(html[data-theme="dark"]) .cta-band p {
+    color: #171717;
+  }
+
+  .btn-inverse {
+    display: inline-block;
+    background: var(--color-on-ink);
+    color: var(--color-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+  }
+</style>

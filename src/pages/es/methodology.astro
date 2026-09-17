@@ -1,0 +1,244 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { PROPERTY_TAX_BY_STATE } from "../../lib/data/property-tax-by-state";
+import { INSURANCE_BY_STATE } from "../../lib/data/homeowners-insurance-by-state";
+import { PMI_DATA_SOURCE } from "../../lib/data/pmi-rates";
+import { RATE_SOURCE, BASE_RATE_AS_OF } from "../../lib/data/interest-rates-by-credit-band";
+import { MAINTENANCE_RATE_ANNUAL } from "../../lib/engine/housingCost";
+import { TIER_THRESHOLDS } from "../../lib/engine/tiers";
+import { MAX_BINARY_SEARCH_ITERATIONS, CONVERGENCE_DOLLARS } from "../../lib/engine/maxPrice";
+import { formatPct } from "../../lib/format";
+
+const anyTaxEntry = Object.values(PROPERTY_TAX_BY_STATE)[0];
+const anyInsuranceEntry = Object.values(INSURANCE_BY_STATE)[0];
+
+const locale = "es" as const;
+
+const title = "Metodología — Cada Fórmula, Suposición y Fuente de Datos | TrueAfford";
+const description = "La matemática completa y verificable detrás de cada número que muestra TrueAfford: fórmulas, umbrales de niveles, fuentes de datos y sus fechas de última actualización.";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="methodology">
+  <section class="container hero">
+    <p class="eyebrow">Metodología</p>
+    <h1>Cada número aquí se remonta a esta página</h1>
+    <p class="intro">
+      La mayoría de las calculadoras de asequibilidad son construidas por empresas que ganan dinero cuando el número parece más grande. Esta página existe para que nunca tengas que confiar en nuestra palabra — cada fórmula, cada suposición y cada fuente de datos está
+      documentada abajo, con la fecha en que fue verificada por última vez.
+    </p>
+  </section>
+
+  <section class="container section" id="dti">
+    <h2>Razones de deuda a ingreso</h2>
+    <p>
+      Los prestamistas evalúan dos razones: la <strong>razón de vivienda</strong> (pago de vivienda propuesto ÷ ingreso mensual bruto) y la <strong>razón total de deuda a ingreso</strong> ((pago de vivienda + otras deudas mensuales) ÷ ingreso
+      mensual bruto). "Otras deudas mensuales" significa los pagos mínimos que un prestamista cuenta — préstamos de auto, préstamos estudiantiles, tarjetas de crédito y similares — no los gastos cotidianos de vida. Ambas razones usan el
+      <em>pago mensual contado por el prestamista</em>: principal, interés, impuesto predial, seguro, PMI y cuotas de HOA. El mantenimiento se excluye deliberadamente aquí, porque los prestamistas tampoco lo cuentan — mira <a href="#leftover-income">ingreso sobrante</a> para ver dónde sí cuenta.
+    </p>
+  </section>
+
+  <section class="container section" id="tiers">
+    <h2>La escala de tres niveles</h2>
+    <p>Un escenario se clasifica evaluando estas condiciones de la más estricta a la más laxa y tomando la primera que coincide por completo:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Nivel</th>
+          <th>Vivienda ÷ ingreso bruto</th>
+          <th>Deuda total ÷ ingreso bruto</th>
+          <th>Ingreso sobrante tras todos los gastos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cómodo</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.comfortable.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.comfortable.maxDebtRatio)}</td>
+          <td>≥ {formatPct(TIER_THRESHOLDS.comfortable.minLeftoverPctOfNet)} del ingreso neto</td>
+        </tr>
+        <tr>
+          <td>Ajustado</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.stretch.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.stretch.maxDebtRatio)}</td>
+          <td>≥ {formatPct(TIER_THRESHOLDS.stretch.minLeftoverPctOfNet)} del ingreso neto</td>
+        </tr>
+        <tr>
+          <td>Riesgoso</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.risky.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.risky.maxDebtRatio)}</td>
+          <td>No requerido — se marca sin importar el remanente</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Por encima de los umbrales de Riesgoso, la calculadora no devuelve ningún precio en absoluto — en cambio, nombra qué condición específica está fallando y por cuánto, en lugar de mostrar un número que no significa nada.</p>
+  </section>
+
+  <section class="container section" id="leftover-income">
+    <h2>Ingreso sobrante — la prueba que los prestamistas se saltan</h2>
+    <p>
+      Después de calcular el pago contado por el prestamista, esta calculadora añade una <strong>reserva de mantenimiento</strong> (ver abajo) para obtener el costo mensual real de vivienda del hogar, luego resta eso, otras deudas y
+      gastos de la vida real — cuidado infantil, salud, alimentos, transporte, otros — del <strong>ingreso mensual neto (a casa)</strong>. Lo que queda es la cifra de ingreso sobrante que se muestra en cada resultado.
+    </p>
+    <p>
+      Un hogar puede pasar ambas razones de deuda a ingreso y aun así tener ingreso sobrante negativo una vez que se cuentan los gastos reales. Cuando eso ocurre, el resultado lo dice directamente y colorea el aviso en rojo — esta es la razón
+      más común por la que un hogar recibiría un "sí" de una calculadora genérica y un "no cómodamente" de esta.
+    </p>
+  </section>
+
+  <section class="container section" id="lender-vs-sustainable">
+    <h2>Aprobación del prestamista frente a precio sostenible</h2>
+    <p>
+      La cifra de "el prestamista probablemente aprobaría" es el precio máximo de vivienda al cual las razones de deuda a ingreso por sí solas se mantienen dentro de los límites del nivel Riesgoso — el número más generoso que la matemática de
+      razones de un prestamista produciría, ignorando por completo el ingreso sobrante. La cifra de "realmente puedes sostener" ignora las razones DTI y en cambio resuelve para el precio máximo al cual el ingreso sobrante se mantiene en cero o por encima. Se calculan de forma independiente;
+      cuando divergen, la brecha es exactamente la cantidad de vivienda que un prestamista podría aprobar pero que tu presupuesto mensual realmente no puede sostener.
+    </p>
+  </section>
+
+  <section class="container section" id="maintenance">
+    <h2>Reserva de mantenimiento</h2>
+    <p>
+      Cada resultado presupuesta {formatPct(MAINTENANCE_RATE_ANNUAL)} del precio de la vivienda por año (dividido mensualmente) para mantenimiento y reparaciones — techos, calentadores de agua, sistemas de calefacción y aire acondicionado. Este es un costo real e inevitable
+      de ser propietario que la mayoría de las calculadoras omite por completo porque hace que el número principal se vea más pequeño. Está incluido en el total de "costo mensual real" y en cada cálculo de ingreso sobrante, pero excluido del pago contado por el prestamista
+      y de las razones DTI, ya que los prestamistas tampoco lo cuentan.
+    </p>
+  </section>
+
+  <section class="container section" id="pmi">
+    <h2>Seguro hipotecario privado (PMI)</h2>
+    <p>
+      El PMI aplica siempre que el enganche sea menor al 20% (razón préstamo-valor superior al 80%), cotizado como un porcentaje anual del monto del préstamo que varía según la banda de crédito y la banda de préstamo-valor. Por ley federal, el PMI se cancela automáticamente
+      una vez que el préstamo se amortiza hasta el 78% del valor <em>original</em> de la vivienda — esta calculadora calcula el mes exacto en que eso ocurre a través de la tabla de amortización del préstamo y lo muestra, en lugar de tratar al PMI
+      como un costo fijo durante toda la vida del préstamo o ignorar el corte.
+    </p>
+    <p class="source-note">Fuente: {PMI_DATA_SOURCE.source}. Última revisión {PMI_DATA_SOURCE.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="rates">
+    <h2>Tasas de interés por defecto</h2>
+    <p>
+      Cada banda de crédito se asocia a una tasa fija a 30 años por defecto (los plazos a 15 años cotizan aproximadamente 55 puntos básicos menos), basada en una línea base estática fijada en un momento dado — este producto deliberadamente no obtiene tasas en tiempo real.
+      Puedes anular la tasa directamente si tienes una cotización específica.
+    </p>
+    <p class="source-note">Fuente: {RATE_SOURCE} Línea base fijada {BASE_RATE_AS_OF}.</p>
+  </section>
+
+  <section class="container section" id="property-tax">
+    <h2>Impuesto predial por estado</h2>
+    <p>
+      La tasa efectiva de impuesto predial — impuesto anual como porcentaje del valor de la vivienda — se aplica por estado en lugar de como un único promedio nacional, porque la dispersión real es grande: aproximadamente 0.27% en el estado más bajo hasta más de 2%
+      en el más alto. Estos son promedios estatales; las tasas de condado y municipio varían dentro de cada estado.
+    </p>
+    <p class="source-note">Fuente: {anyTaxEntry.source}. Última revisión {anyTaxEntry.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="insurance">
+    <h2>Seguro de vivienda por estado</h2>
+    <p>
+      El seguro se estima a partir de una prima anual promedio publicada para una vivienda de $300,000 en cada estado, luego se escala proporcionalmente al precio de vivienda que se está evaluando. Los estados con alta presión de huracanes, incendios forestales o
+      disponibilidad de aseguradoras (marcados en los datos subyacentes) presentan las primas más volátiles y de movimiento más rápido y merecen el mayor escrutinio antes de confiar en esta cifra para una decisión de compra real.
+    </p>
+    <p class="source-note">Fuente: {anyInsuranceEntry.source}. Última revisión {anyInsuranceEntry.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="binary-search">
+    <h2>Cómo se resuelve el precio máximo</h2>
+    <p>
+      El impuesto predial, el seguro, el PMI y el mantenimiento escalan todos con el precio de vivienda que se está resolviendo, así que el precio máximo asequible no puede resolverse algebraicamente en un solo paso — se resuelve por búsqueda binaria: probando
+      repetidamente un precio candidato, verificando si aún satisface las condiciones del nivel objetivo (o de sostenibilidad), y acotando el rango en consecuencia. La búsqueda converge dentro de ${CONVERGENCE_DOLLARS}, con un tope de{" "}
+      {MAX_BINARY_SEARCH_ITERATIONS} iteraciones. Este motor de cálculo se prueba de forma independiente de la interfaz, incluyendo valores de pago conocidos verificados contra la matemática de amortización estándar, el umbral de PMI y su
+      comportamiento de corte al 78%, cada límite de nivel en su corte exacto, y casos extremos como ingreso cero, interés cero y un enganche que supera el precio asequible.
+    </p>
+  </section>
+
+  <section class="container section" id="sensitivity">
+    <h2>Sensibilidad — qué cambiaría esto</h2>
+    <p>
+      Cada resultado también muestra cuatro comparaciones de "qué pasaría si", cada una aislando exactamente una variable mientras mantiene todo lo demás constante en el escenario actual: el precio máximo asequible en un punto más bajo y uno más
+      alto de la tasa de interés; el nivel al que caería el hogar si el ingreso bruto y neto bajaran ambos un 20%; el nivel al que caería el hogar con un ilustrativo $1,200/mes añadido para cuidado infantil (una
+      cifra de promedio nacional, no específica del estado); y cómo cambiarían el pago mensual y el PMI con $20,000 más de enganche. Estas son comparaciones deliberadamente simples, de una sola variable — no un planificador de escenarios completo — pensadas
+      para mostrar qué tan frágil o resistente es un resultado dado ante los supuestos que con más probabilidad cambiarán.
+    </p>
+  </section>
+
+  <section class="container section" id="rent-vs-buy">
+    <h2>Simulación de patrimonio neto: alquilar vs. comprar</h2>
+    <p>
+      En lugar de comparar un pago hipotecario mensual con el alquiler, esto ejecuta una simulación mes a mes de ambos caminos como <strong>patrimonio neto a lo largo del tiempo</strong>. El patrimonio neto del comprador en cualquier momento es el valor de la vivienda menos el
+      saldo restante del préstamo menos el costo de venderla en ese momento. El patrimonio neto del inquilino es lo que valdrían el enganche y los costos de cierre si se invirtieran en su lugar, compuestos mensualmente, más la inversión de cada mes de
+      cualquier efectivo que ser propietario hubiera costado más allá de alquilar ese mes — si alquilar es más caro algún mes, no se resta ninguna aportación; la cuenta del inquilino simplemente no crece ese mes en lugar de simular que
+      se endeuda para igualar al propietario.
+    </p>
+    <p>Supuestos por defecto: 3% de apreciación anual de la vivienda, 6% de retorno anual de inversión sobre el dinero no gastado en comprar, 3% de crecimiento anual del alquiler, 6% de costos de venta (comisión del agente y cierre) al vender la vivienda, y 3% de costos de cierre en la compra. Estos son supuestos estáticos por defecto, no proyecciones en tiempo real — los retornos y la apreciación reales varían según el mercado y con el tiempo.</p>
+  </section>
+
+  <section class="container section">
+    <h2>Lo que esta calculadora nunca hará</h2>
+    <p>
+      Ningún anuncio de prestamista ni ubicación patrocinada en un resultado. No se requiere ninguna cuenta para ver un número. Sin muro de correo electrónico. Sin formularios de captación de clientes. Si una futura versión de esta página de metodología alguna vez contradice esa frase, algo ha salido
+      mal — por favor avísanos.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .section {
+    max-width: 760px;
+    padding-bottom: var(--space-2xl);
+  }
+
+  .section h2 {
+    font-size: var(--text-heading-md-size);
+    font-weight: var(--text-heading-md-weight);
+    margin-bottom: var(--space-sm);
+    scroll-margin-top: var(--space-lg);
+  }
+
+  .section p {
+    color: var(--color-body);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-sm);
+  }
+
+  .source-note {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    font-family: var(--font-mono);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-md);
+    font-size: var(--text-body-sm-size);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  th {
+    color: var(--color-mute);
+    font-weight: 500;
+  }
+</style>

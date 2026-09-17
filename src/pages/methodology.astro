@@ -1,0 +1,244 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { PROPERTY_TAX_BY_STATE } from "../lib/data/property-tax-by-state";
+import { INSURANCE_BY_STATE } from "../lib/data/homeowners-insurance-by-state";
+import { PMI_DATA_SOURCE } from "../lib/data/pmi-rates";
+import { RATE_SOURCE, BASE_RATE_AS_OF } from "../lib/data/interest-rates-by-credit-band";
+import { MAINTENANCE_RATE_ANNUAL } from "../lib/engine/housingCost";
+import { TIER_THRESHOLDS } from "../lib/engine/tiers";
+import { MAX_BINARY_SEARCH_ITERATIONS, CONVERGENCE_DOLLARS } from "../lib/engine/maxPrice";
+import { formatPct } from "../lib/format";
+
+const anyTaxEntry = Object.values(PROPERTY_TAX_BY_STATE)[0];
+const anyInsuranceEntry = Object.values(INSURANCE_BY_STATE)[0];
+
+const locale = "en" as const;
+
+const title = "Methodology — Every Formula, Assumption, and Data Source | TrueAfford";
+const description = "The complete, checkable math behind every number TrueAfford shows: formulas, tier thresholds, data sources, and their last-updated dates.";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="methodology">
+  <section class="container hero">
+    <p class="eyebrow">Methodology</p>
+    <h1>Every number here traces back to this page</h1>
+    <p class="intro">
+      Most affordability calculators are built by companies that profit when the number looks bigger. This page exists so you never have to take our word for it — every formula, every assumption, and every data source is
+      documented below, with the date it was last checked.
+    </p>
+  </section>
+
+  <section class="container section" id="dti">
+    <h2>Debt-to-income ratios</h2>
+    <p>
+      Lenders evaluate two ratios: the <strong>housing ratio</strong> (proposed housing payment ÷ gross monthly income) and the <strong>total debt-to-income ratio</strong> ((housing payment + other monthly debts) ÷ gross
+      monthly income). "Other monthly debts" means the minimum payments a lender counts — auto loans, student loans, credit cards, and similar — not day-to-day living expenses. Both ratios use the
+      <em>lender-counted monthly payment</em>: principal, interest, property tax, insurance, PMI, and HOA dues. Maintenance is deliberately excluded here, because lenders don't count it either — see <a href="#leftover-income">leftover income</a> for where it does count.
+    </p>
+  </section>
+
+  <section class="container section" id="tiers">
+    <h2>The three-tier scale</h2>
+    <p>A scenario is classified by evaluating these conditions from strictest to loosest and taking the first one that fully matches:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Housing ÷ gross income</th>
+          <th>Total debt ÷ gross income</th>
+          <th>Leftover income after all expenses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Comfortable</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.comfortable.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.comfortable.maxDebtRatio)}</td>
+          <td>≥ {formatPct(TIER_THRESHOLDS.comfortable.minLeftoverPctOfNet)} of net income</td>
+        </tr>
+        <tr>
+          <td>Stretch</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.stretch.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.stretch.maxDebtRatio)}</td>
+          <td>≥ {formatPct(TIER_THRESHOLDS.stretch.minLeftoverPctOfNet)} of net income</td>
+        </tr>
+        <tr>
+          <td>Risky</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.risky.maxHousingRatio)}</td>
+          <td>≤ {formatPct(TIER_THRESHOLDS.risky.maxDebtRatio)}</td>
+          <td>Not required — flagged regardless of remainder</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Above Risky's thresholds, the calculator returns no price at all — instead it names which specific condition is failing and by how much, rather than showing a number that doesn't mean anything.</p>
+  </section>
+
+  <section class="container section" id="leftover-income">
+    <h2>Leftover income — the test lenders skip</h2>
+    <p>
+      After computing the lender-counted payment, this calculator adds a <strong>maintenance reserve</strong> (see below) to get the household's true monthly housing cost, then subtracts that, other debts, and real-life
+      expenses — childcare, healthcare, groceries, transport, other — from <strong>net (take-home) monthly income</strong>. What's left is the leftover income figure shown on every result.
+    </p>
+    <p>
+      A household can pass both debt-to-income ratios and still have negative leftover income once real expenses are counted. When that happens, the result says so directly and colors the callout red — this is the single
+      most common reason a household would be told "yes" by a generic calculator and "not comfortably" by this one.
+    </p>
+  </section>
+
+  <section class="container section" id="lender-vs-sustainable">
+    <h2>Lender-approval vs. sustainable price</h2>
+    <p>
+      The "lender would likely approve" figure is the maximum home price at which the debt-to-income ratios alone stay within the Risky tier's ceilings — the most generous number a lender's ratio math would produce,
+      ignoring leftover income entirely. The "you can actually sustain" figure ignores DTI ratios and instead solves for the maximum price at which leftover income stays at or above zero. They're computed independently;
+      when they diverge, the gap is exactly the amount of home a lender might approve that your monthly budget can't actually carry.
+    </p>
+  </section>
+
+  <section class="container section" id="maintenance">
+    <h2>Maintenance reserve</h2>
+    <p>
+      Every result budgets {formatPct(MAINTENANCE_RATE_ANNUAL)} of the home's price per year (split monthly) for maintenance and repairs — roofs, water heaters, HVAC systems. This is a real, unavoidable cost of ownership
+      that most calculators omit entirely because it makes the headline number smaller. It's included in the "true monthly cost" total and in every leftover-income calculation, but excluded from the lender-counted payment
+      and DTI ratios, since lenders don't count it either.
+    </p>
+  </section>
+
+  <section class="container section" id="pmi">
+    <h2>Private mortgage insurance (PMI)</h2>
+    <p>
+      PMI applies whenever the down payment is under 20% (loan-to-value over 80%), priced as an annual percentage of the loan amount that varies by credit band and loan-to-value band. By federal law, PMI automatically
+      cancels once the loan amortizes down to 78% of the home's <em>original</em> value — this calculator computes the actual month that happens via the loan's amortization schedule and shows it, rather than treating PMI
+      as a flat cost for the life of the loan or ignoring the cutoff.
+    </p>
+    <p class="source-note">Source: {PMI_DATA_SOURCE.source}. Last reviewed {PMI_DATA_SOURCE.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="rates">
+    <h2>Interest rate defaults</h2>
+    <p>
+      Each credit band maps to a default 30-year fixed rate (15-year terms price roughly 55 basis points lower), based on a static baseline set at a point in time — this product deliberately does not pull live rate feeds.
+      You can override the rate directly if you have a specific quote.
+    </p>
+    <p class="source-note">Source: {RATE_SOURCE} Baseline set {BASE_RATE_AS_OF}.</p>
+  </section>
+
+  <section class="container section" id="property-tax">
+    <h2>Property tax by state</h2>
+    <p>
+      Effective property tax rate — annual tax as a percentage of home value — is applied per state rather than as a single national average, because the real spread is large: roughly 0.27% in the lowest state to over 2%
+      in the highest. These are statewide averages; county and municipal rates vary within every state.
+    </p>
+    <p class="source-note">Source: {anyTaxEntry.source}. Last reviewed {anyTaxEntry.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="insurance">
+    <h2>Homeowner's insurance by state</h2>
+    <p>
+      Insurance is estimated from a published average annual premium for a $300,000 dwelling in each state, then scaled proportionally to the home price being evaluated. States with heavy hurricane, wildfire, or
+      insurer-availability pressure (flagged in the underlying data) see the most volatile, fastest-moving premiums and deserve the most scrutiny before relying on this figure for a real purchase decision.
+    </p>
+    <p class="source-note">Source: {anyInsuranceEntry.source}. Last reviewed {anyInsuranceEntry.lastUpdated}.</p>
+  </section>
+
+  <section class="container section" id="binary-search">
+    <h2>How maximum price is solved</h2>
+    <p>
+      Property tax, insurance, PMI, and maintenance all scale with the home price being solved for, so maximum affordable price can't be solved algebraically in one step — it's solved by binary search: repeatedly testing a
+      candidate price, checking whether it still satisfies the target tier's (or the sustainability) conditions, and narrowing the range accordingly. The search converges to within ${CONVERGENCE_DOLLARS}, capped at{" "}
+      {MAX_BINARY_SEARCH_ITERATIONS} iterations. This calculation engine is unit-tested independently of the interface, including known-good payment values checked against standard amortization math, PMI threshold and
+      78%-dropoff behavior, every tier boundary at its exact cutoff, and edge cases like zero income, zero interest, and a down payment that exceeds the affordable price.
+    </p>
+  </section>
+
+  <section class="container section" id="sensitivity">
+    <h2>Sensitivity — what would change this</h2>
+    <p>
+      Every result also shows four "what if" comparisons, each isolating exactly one variable while holding everything else constant at the current scenario: the maximum affordable price at a point lower and a point
+      higher on the interest rate; the tier the household would fall into if gross and net income both dropped 20%; the tier the household would fall into with an illustrative $1,200/mo added for childcare (a
+      national-average figure, not state-specific); and how the monthly payment and PMI would change with $20,000 more down. These are deliberately simple, single-variable comparisons — not a full scenario planner — meant
+      to surface how fragile or resilient a given result is to the assumptions most likely to change.
+    </p>
+  </section>
+
+  <section class="container section" id="rent-vs-buy">
+    <h2>Rent vs. buy net worth simulation</h2>
+    <p>
+      Rather than comparing a monthly mortgage payment to rent, this runs a month-by-month simulation of both paths as <strong>net worth over time</strong>. The buyer's net worth at any point is home value minus the
+      remaining loan balance minus the cost to sell right then. The renter's net worth is what the down payment and closing costs would be worth if invested instead, compounded monthly, plus every month's investment of
+      whatever cash owning would have cost beyond renting that month — if renting is more expensive some month, no contribution is subtracted; the renter's account simply doesn't grow that month rather than modeling them
+      going into debt to match the owner.
+    </p>
+    <p>Default assumptions: 3% annual home appreciation, 6% annual investment return on money not spent buying, 3% annual rent growth, 6% selling costs (agent commission and closing) when the home is sold, and 3% closing costs on purchase. These are static defaults, not live projections — real returns and appreciation vary by market and over time.</p>
+  </section>
+
+  <section class="container section">
+    <h2>What this calculator will never do</h2>
+    <p>
+      No lender ads or sponsored placements in a result. No account required to see a number. No email gate. No lead form. If a future version of this methodology page ever contradicts that sentence, something has gone
+      wrong — please tell us.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .section {
+    max-width: 760px;
+    padding-bottom: var(--space-2xl);
+  }
+
+  .section h2 {
+    font-size: var(--text-heading-md-size);
+    font-weight: var(--text-heading-md-weight);
+    margin-bottom: var(--space-sm);
+    scroll-margin-top: var(--space-lg);
+  }
+
+  .section p {
+    color: var(--color-body);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-sm);
+  }
+
+  .source-note {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    font-family: var(--font-mono);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-md);
+    font-size: var(--text-body-sm-size);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  th {
+    color: var(--color-mute);
+    font-weight: 500;
+  }
+</style>

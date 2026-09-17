@@ -1,0 +1,56 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import BudgetCalculator from "../../components/calculator/BudgetCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeBudgetResults } from "../../lib/state/computeBudgetResults";
+import { formatPct } from "../../lib/format";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeBudgetResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Presupuesto Mensual — Regla 50/30/20 Con Tu Pago Real de Vivienda | TrueAfford";
+const description =
+  "Una calculadora de presupuesto mensual que ubica tu ingreso, deudas y gastos reales dentro de la regla 50/30/20, con tu pago de vivienda tomado directamente de tu escenario de asequibilidad — no una estimación.";
+
+const ogTitle = hasScenario ? `Necesidades en ${formatPct(results.budget.needsPctOfNet)} del ingreso frente a una meta del 50% — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="budget-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Presupuesto Mensual"
+    heading="¿Dónde encaja realmente tu pago de vivienda?"
+    intro="La regla 50/30/20 es una verificación útil que casi nadie ejecuta con sus números reales. Esta ubica tu ingreso, deudas y gastos directamente en ella — usando el pago de vivienda ya calculado a partir de tu escenario de asequibilidad, no una estimación."
+    faqs={[
+      {
+        question: "¿Cómo se calcula 'Necesidades'?",
+        answer:
+          "Tu pago de vivienda más otros pagos de deuda, cuidado infantil, salud, alimentos y transporte. Estos se tratan como obligatorios — las cosas que te costaría recortar rápidamente.",
+      },
+      {
+        question: "¿Qué cuenta como 'Deseos'?",
+        answer:
+          "El campo 'Otros' de tus gastos de la vida real — lo más cercano que los datos compartidos de este sitio tienen al gasto discrecional. Si quieres una cifra de deseos más precisa, ajusta ese campo en cualquier calculadora; se traslada aquí automáticamente.",
+      },
+      {
+        question: "¿De dónde sale el número de vivienda?",
+        answer:
+          "Por defecto, es el pago mensual sostenible ya calculado en las calculadoras de asequibilidad — principal, interés, impuesto, seguro, PMI, HOA y mantenimiento, para tu escenario actual. Puedes anularlo directamente si estás alquilando o probando una cifra distinta.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "rent-affordability-calculator"), label: "Calculadora de asequibilidad de alquiler" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Calculadora de alquilar vs. comprar" },
+    ]}
+  >
+    <BudgetCalculator />
+  </CalculatorPageShell>
+</Layout>

@@ -1,0 +1,81 @@
+---
+import { DEFAULT_LOCALE, localizedPath, type LocaleCode } from "../../i18n/locales";
+import { CHROME } from "../../i18n/chrome";
+
+interface Props {
+  locale?: LocaleCode;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const t = CHROME[locale];
+const year = new Date().getFullYear();
+
+// Privacy policy and terms aren't translated yet, so these always point at the English pages.
+const links = [
+  { href: localizedPath(locale, "about-us"), label: t.footer.aboutUs },
+  { href: localizedPath(locale, "contact-us"), label: t.footer.contactUs },
+  { href: "/privacy-policy", label: t.footer.privacyPolicy },
+  { href: "/terms-and-conditions", label: t.footer.termsAndConditions },
+];
+---
+
+<div class="sticky-legal-bar">
+  <div class="container sticky-legal-inner">
+    <p class="sticky-legal-copy">© {year} TrueAfford</p>
+    <nav class="sticky-legal-links" aria-label="Legal">
+      {
+        links.map((link) => (
+          <a href={link.href}>{link.label}</a>
+        ))
+      }
+    </nav>
+  </div>
+</div>
+
+<style>
+  .sticky-legal-bar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 30;
+    background: var(--color-canvas-elevated);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .sticky-legal-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-block: var(--space-xs);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .sticky-legal-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sticky-legal-copy {
+    flex-shrink: 0;
+    color: var(--color-mute);
+    font-size: var(--text-body-sm-size);
+  }
+
+  .sticky-legal-links {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .sticky-legal-links a {
+    flex-shrink: 0;
+    color: var(--color-body);
+    font-size: var(--text-body-sm-size);
+    text-decoration: none;
+  }
+
+  .sticky-legal-links a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+</style>

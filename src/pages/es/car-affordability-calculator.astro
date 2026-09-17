@@ -1,0 +1,62 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import CarAffordabilityCalculator from "../../components/calculator/CarAffordabilityCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeCarResults } from "../../lib/state/computeCarResults";
+import { formatUSD } from "../../lib/format";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeCarResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Asequibilidad de Auto — Cuánto Auto Puedes Realmente Pagar | TrueAfford";
+const description =
+  "Una calculadora de asequibilidad de auto basada en la regla 20/4/10, con el costo mensual real incluyendo impuesto de venta, interés del préstamo según la banda de crédito, y seguro — más una prueba de ingreso sobrante que los prestamistas no ejecutan.";
+
+const ogTitle = hasScenario ? `Este hogar puede pagar hasta ${formatUSD(results.evaluatedPrice)} en un auto — TrueAfford` : undefined;
+const ogDescription = hasScenario ? "Ve el desglose completo de la regla 20/4/10, el impuesto de venta, el costo del préstamo, y si el pago realmente encaja en el presupuesto." : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} ogDescription={ogDescription} locale={locale} translationSlug="car-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Asequibilidad de Auto"
+    heading="¿Cuánto auto puedes realmente pagar?"
+    intro="Los concesionarios y prestamistas te aprobarán por más auto del que tu presupuesto puede sostener. Esta calculadora aplica la regla 20/4/10, y luego la verifica contra tu presupuesto mensual real — impuesto de venta, interés del préstamo según tu banda de crédito, y seguro, todo incluido."
+    faqs={[
+      {
+        question: "¿Cuánto auto puedo pagar según mi ingreso?",
+        answer:
+          "Como punto de partida, esta calculadora usa la regla 20/4/10: al menos 20% de enganche, un plazo de préstamo de 4 años (48 meses) o menos, y un costo total del vehículo (pago del préstamo más seguro) igual o menor al 10% de tu ingreso bruto mensual. Ese es el nivel Cómodo. Ajustado y Riesgoso amplían ese límite, de la misma forma en que las demás calculadoras de este sitio amplían más allá de la razón ideal de un prestamista — pero ampliar la razón no amplía tu cuenta bancaria real, por eso existe la verificación de ingreso sobrante.",
+      },
+      {
+        question: "¿Qué es la regla 20/4/10?",
+        answer:
+          "Una regla general de finanzas personales ampliamente citada para comprar autos: da al menos 20% de enganche, financia por no más de 4 años, y mantén el costo total mensual del vehículo (pago más seguro) igual o menor al 10% de tu ingreso bruto mensual. No es una regulación crediticia — es una pauta conservadora, y esta calculadora la usa como ancla para el nivel Cómodo.",
+      },
+      {
+        question: "¿Esto incluye impuesto de venta y seguro?",
+        answer:
+          "Sí. El impuesto de venta se calcula usando la tasa combinada típica de tu estado sobre el precio menos cualquier valor de intercambio (trade-in), y luego se financia dentro del préstamo junto con el resto del precio de compra menos tu enganche y el trade-in. El seguro mensual es un dato de entrada directo, ya que las primas varían demasiado según el conductor, el vehículo y la ubicación como para estimarlas a partir de una tabla.",
+      },
+      {
+        question: "¿En qué se diferencia una calculadora de asequibilidad de préstamo de auto de lo que un concesionario o prestamista aprobará?",
+        answer:
+          "El departamento de financiamiento de un prestamista o concesionario verifica si calificas para un préstamo, no si el pago deja espacio en tu presupuesto para todo lo demás. Esta calculadora ejecuta ambas cosas: la regla estilo 20/4/10 que la mayoría de las guías de finanzas personales recomienda, y una prueba de ingreso sobrante independiente que resta tus otras deudas y gastos mensuales reales para ver si el pago es realmente sostenible. La brecha entre las dos es el número que vale la pena tener en cuenta.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "mortgage-calculator"), label: "calculadora de asequibilidad hipotecaria" },
+      { href: localizedPath(locale, "budget-calculator"), label: "calculadora de presupuesto mensual" },
+    ]}
+  >
+    <CarAffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

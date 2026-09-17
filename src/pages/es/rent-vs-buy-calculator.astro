@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import RentVsBuyCalculator from "../../components/calculator/RentVsBuyCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeRentVsBuyResults } from "../../lib/state/computeRentVsBuyResults";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeRentVsBuyResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Alquilar vs. Comprar — Patrimonio Neto en el Tiempo, No Solo Costo Mensual | TrueAfford";
+const description = "Compara comprar y alquilar como dos trayectorias de patrimonio neto en el tiempo, considerando la plusvalía, la apreciación y lo que el enganche ganaría si se invirtiera — no solo un pago mensual lado a lado.";
+
+const choiceLabel = results.simulation.betterChoiceAtTenure === "roughly equal" ? "una decisión prácticamente pareja" : results.simulation.betterChoiceAtTenure === "buy" ? "comprar" : "alquilar";
+const ogTitle = hasScenario ? `A los ${results.tenureYears} años, este escenario favorece ${choiceLabel} — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="rent-vs-buy-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Alquilar vs. Comprar"
+    heading="¿Comprar es realmente mejor que alquilar aquí — o solo lo parece?"
+    intro="Comparar un pago hipotecario con el alquiler pierde el punto. Esto ejecuta una simulación mes a mes de ambos caminos como patrimonio neto en el tiempo — la plusvalía y la apreciación de la vivienda por un lado, lo que tu enganche ganaría si se invirtiera por el otro — para que veas cuándo, si acaso, comprar realmente toma la delantera."
+    faqs={[
+      {
+        question: "¿Por qué patrimonio neto en lugar de pago mensual?",
+        answer:
+          "Un pago mensual más bajo no significa un mejor resultado financiero. Alquilar libera el efectivo que habría ido a un enganche para invertirlo en otra parte, mientras que comprar genera plusvalía a medida que el préstamo se amortiza y la vivienda se aprecia. El patrimonio neto captura ambos lados; una comparación de pagos no captura ninguno.",
+      },
+      {
+        question: "¿Qué pasa si me mudo antes del año de equilibrio?",
+        answer:
+          "Los costos de venta — asumidos en 6% del precio de venta por comisión del agente y cierre — reducen la plusvalía de inmediato, razón por la cual comprar a menudo pierde frente a alquilar en periodos cortos incluso cuando el pago mensual es similar. La gráfica muestra exactamente cuándo, si acaso, eso cambia para tus números.",
+      },
+      {
+        question: "¿Qué retorno asume el modelo sobre el efectivo invertido?",
+        answer:
+          "6% anual por defecto sobre el dinero que un inquilino no está destinando a un enganche o pagando más allá de su alquiler mensual. Eso es un supuesto real, no una certeza — un retorno realista más bajo o más alto para tu propia situación desplazará de forma significativa el año de equilibrio.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Calculadora de hipoteca" },
+      { href: localizedPath(locale, "rent-affordability-calculator"), label: "Calculadora de asequibilidad de alquiler" },
+      { href: localizedPath(locale, "methodology"), label: "Metodología" },
+    ]}
+  >
+    <RentVsBuyCalculator />
+  </CalculatorPageShell>
+</Layout>

@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import AmortizationCalculator from "../components/calculator/AmortizationCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeAmortizationResults } from "../lib/state/computeAmortizationResults";
+import { formatUSD } from "../lib/format";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeAmortizationResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Amortization Schedule Calculator — See Interest Saved From Extra Payments | TrueAfford";
+const description = "A full year-by-year amortization schedule with an optional extra monthly payment, showing exactly how much interest you'd save and how many months you'd remove from the loan.";
+
+const ogTitle = hasScenario && scenario.extraMonthlyPayment > 0 ? `Extra payments save ${formatUSD(results.amortization.interestSaved)} in interest — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="amortization-schedule-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Amortization Schedule Calculator"
+    heading="What an extra payment actually does to your loan"
+    intro="An extra $200 a month sounds small. Applied straight to principal, it can remove years off a mortgage and tens of thousands in interest — this calculator shows you exactly how much, year by year, not just the headline number."
+    faqs={[
+      {
+        question: "Where does extra payment money go?",
+        answer:
+          "Straight to principal, on top of your regular payment. Because interest is calculated on the remaining balance each month, reducing that balance faster means less interest accrues for the rest of the loan — which compounds into real savings.",
+      },
+      {
+        question: "Is paying extra always the right move?",
+        answer:
+          "Not necessarily — it depends on your rate versus what you could earn investing that money elsewhere, and whether you have higher-interest debt to pay down first. This calculator shows you the mechanical effect on the loan; it's one input to that decision, not the whole answer.",
+      },
+      {
+        question: "Why does the yearly table matter more than a lump total?",
+        answer:
+          "Because payoff isn't linear — the balance drops slowly at first and rapidly near the end. Seeing it year by year makes clear roughly when extra payments start making the biggest difference.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Mortgage calculator" },
+      { href: localizedPath(locale, "closing-costs-calculator"), label: "Closing costs calculator" },
+      { href: localizedPath(locale, "methodology"), label: "Methodology" },
+    ]}
+  >
+    <AmortizationCalculator />
+  </CalculatorPageShell>
+</Layout>

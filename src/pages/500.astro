@@ -1,0 +1,48 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+
+interface Props { error?: unknown; }
+
+// Astro provides this when rendering fails. Do not expose it: error messages
+// and stacks may reveal server implementation details.
+const { error: _error } = Astro.props as Props;
+
+const title = "Something Went Wrong - TrueAfford";
+const description = "TrueAfford hit an unexpected error. Try again, or head back to the homepage.";
+---
+
+<Layout title={title} description={description} robots="noindex, follow">
+  <section class="container error-hero">
+    <div class="error-visual" aria-hidden="true"><span class="error-code">500</span><span class="status-dot"></span></div>
+    <p class="eyebrow">Temporary server error</p>
+    <h1>Something broke on our end</h1>
+    <p class="intro">Not you - us. The page couldn't load right now. Try again in a moment, or return to a calculator below.</p>
+    <div class="actions">
+      <a class="btn-primary" href="/">Back to homepage <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn-secondary" href="/home-affordability-calculator">Try a calculator</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .error-hero { padding-block: var(--space-4xl); max-width: 680px; text-align: center; margin-inline: auto; }
+  .error-visual { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 218px; height: 118px; margin-bottom: var(--space-lg); }
+  .error-visual::before, .error-visual::after { content: ""; position: absolute; border: 1px solid var(--color-error-soft); border-radius: 50%; }
+  .error-visual::before { width: 90px; height: 90px; background: var(--color-error-soft); opacity: 0.5; }
+  .error-visual::after { width: 112px; height: 112px; }
+  .error-code { position: relative; z-index: 1; font-family: var(--font-mono); font-size: clamp(72px, 14vw, 112px); font-weight: 600; line-height: 1; letter-spacing: -0.08em; color: var(--color-error); }
+  .status-dot { position: absolute; right: 18px; bottom: 8px; z-index: 2; width: 14px; height: 14px; border: 3px solid var(--color-canvas); border-radius: 50%; background: var(--color-error); }
+  .error-hero .eyebrow { margin-bottom: var(--space-xs); }
+  .error-hero h1 { font-size: var(--text-heading-lg-size); font-weight: var(--text-heading-lg-weight); line-height: var(--text-heading-lg-leading); letter-spacing: var(--text-heading-lg-tracking); margin-bottom: var(--space-sm); }
+  .error-hero .intro { font-size: var(--text-body-lg-size); line-height: var(--text-body-lg-leading); color: var(--color-body); margin-inline: auto; max-width: 51ch; margin-bottom: var(--space-lg); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-sm); }
+  .btn-primary, .btn-secondary { display: inline-block; text-decoration: none; border-radius: var(--radius-pill); padding: var(--space-sm) var(--space-lg); font-size: var(--text-button-lg-size); font-weight: var(--text-button-lg-weight); min-height: 44px; line-height: 20px; }
+  .btn-primary { background: var(--color-ink); color: var(--color-on-ink); }
+  .btn-primary span { display: inline-block; margin-left: 4px; transition: transform 0.15s ease; }
+  .btn-primary:hover span { transform: translateX(3px); }
+  .btn-secondary { color: var(--color-ink); border: 1px solid var(--color-hairline); }
+  .btn-secondary:hover { border-color: var(--color-ink); }
+  @media (max-width: 480px) { .error-hero { padding-block: var(--space-3xl); } .actions > a { width: 100%; } }
+</style>

@@ -1,0 +1,227 @@
+---
+import { decodeScenario, scenarioToQueryString } from "../../lib/state/serialize";
+import { computeBudgetResults } from "../../lib/state/computeBudgetResults";
+import { BUDGET_TARGETS } from "../../lib/engine/budget";
+import { formatUSD, formatPct, formatSignedUSD } from "../../lib/format";
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeBudgetResults(scenario);
+const { budget } = results;
+
+const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), Astro.site ?? Astro.url.origin).toString();
+
+function barWidth(pct: number): number {
+  return Math.max(0, Math.min(100, pct * 100));
+}
+---
+
+<div class="calculator-grid" data-budget-calculator>
+  <form id="budget-form" class="calculator-form-col" method="get">
+    <fieldset class="field-group">
+      <legend>Income &amp; debts</legend>
+      <label class="field">
+        <span>Annual household income (gross)</span>
+        <input type="number" inputmode="numeric" name="gi" id="field-gi" min="0" step="1000" value={scenario.grossAnnualIncome} />
+      </label>
+      <label class="field">
+        <span>Monthly take-home pay (net)</span>
+        <input type="number" inputmode="numeric" name="ni" id="field-ni" min="0" step="50" value={scenario.netMonthlyIncome} />
+      </label>
+      <label class="field">
+        <span>Other monthly debt payments</span>
+        <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Real-life monthly expenses</legend>
+      <p class="field-group-note">"Other" here is treated as discretionary spending (Wants) — everything else below is treated as a Need.</p>
+      <label class="field">
+        <span>Childcare</span>
+        <input type="number" inputmode="numeric" name="ec" id="field-ec" min="0" step="25" value={scenario.childcare} />
+      </label>
+      <label class="field">
+        <span>Healthcare</span>
+        <input type="number" inputmode="numeric" name="eh" id="field-eh" min="0" step="25" value={scenario.healthcare} />
+      </label>
+      <label class="field">
+        <span>Groceries</span>
+        <input type="number" inputmode="numeric" name="eg" id="field-eg" min="0" step="25" value={scenario.groceries} />
+      </label>
+      <label class="field">
+        <span>Transport</span>
+        <input type="number" inputmode="numeric" name="et" id="field-et" min="0" step="25" value={scenario.transport} />
+      </label>
+      <label class="field">
+        <span>Other (discretionary)</span>
+        <input type="number" inputmode="numeric" name="eo" id="field-eo" min="0" step="25" value={scenario.otherExpenses} />
+      </label>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>Housing payment</legend>
+      <label class="field">
+        <span>Monthly housing payment</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          name="bh"
+          id="field-bh"
+          form="budget-form"
+          min="0"
+          step="50"
+          value={results.isCustomHousingPayment ? results.housingPayment : ""}
+          placeholder={String(Math.round(results.defaultHousingPayment))}
+        />
+      </label>
+      <p class="field-group-note">Defaults to the sustainable monthly cost from your affordability scenario. Override this if you're renting or testing a different number.</p>
+      <button type="button" id="reset-housing-payment" class="btn-ghost-sm" hidden={!results.isCustomHousingPayment}>Reset to calculated</button>
+    </fieldset>
+
+    <noscript>
+      <button type="submit" class="btn-primary">Calculate</button>
+    </noscript>
+  </form>
+
+  <div class="results-col" id="budget-results" aria-live="polite">
+    <div>
+      <p class="eyebrow">Your budget</p>
+      <h2>50/30/20 breakdown</h2>
+    </div>
+
+    {
+      budget.housingAloneExceedsNeedsTarget && (
+        <div class="callout callout-warning" id="housing-exceeds-warning">
+          <p class="callout-title">Housing alone exceeds your entire Needs target</p>
+          <p>Your housing payment by itself is more than 50% of your net income — before groceries, transportation, or anything else in the Needs category.</p>
+        </div>
+      )
+    }
+
+    <div class="budget-bars" id="budget-bars">
+      <div class="budget-bar-row" data-category="needs">
+        <div class="budget-bar-label">
+          <span>Needs</span>
+          <span data-bind="needsActual">{formatUSD(budget.needs)}</span>
+          <span class="target-note">target {formatPct(BUDGET_TARGETS.needsPct)}</span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill fill-needs" id="bar-needs" style={`width:${barWidth(budget.needsPctOfNet)}%`}></div>
+          <div class="budget-bar-target" style={`left:${BUDGET_TARGETS.needsPct * 100}%`}></div>
+        </div>
+        <p class="budget-delta" data-bind="needsDelta">
+          {budget.needsDeltaDollars > 0 ? `${formatUSD(budget.needsDeltaDollars)} over target` : `${formatUSD(Math.abs(budget.needsDeltaDollars))} under target`}
+        </p>
+      </div>
+
+      <div class="budget-bar-row" data-category="wants">
+        <div class="budget-bar-label">
+          <span>Wants</span>
+          <span data-bind="wantsActual">{formatUSD(budget.wants)}</span>
+          <span class="target-note">target {formatPct(BUDGET_TARGETS.wantsPct)}</span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill fill-wants" id="bar-wants" style={`width:${barWidth(budget.wantsPctOfNet)}%`}></div>
+          <div class="budget-bar-target" style={`left:${BUDGET_TARGETS.wantsPct * 100}%`}></div>
+        </div>
+        <p class="budget-delta" data-bind="wantsDelta">
+          {budget.wantsDeltaDollars > 0 ? `${formatUSD(budget.wantsDeltaDollars)} over target` : `${formatUSD(Math.abs(budget.wantsDeltaDollars))} under target`}
+        </p>
+      </div>
+
+      <div class="budget-bar-row" data-category="savings">
+        <div class="budget-bar-label">
+          <span>Savings / debt paydown</span>
+          <span data-bind="savingsActual">{formatSignedUSD(budget.savings)}</span>
+          <span class="target-note">target {formatPct(BUDGET_TARGETS.savingsPct)}</span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill fill-savings" id="bar-savings" style={`width:${barWidth(Math.max(0, budget.savingsPctOfNet))}%`}></div>
+          <div class="budget-bar-target" style={`left:${BUDGET_TARGETS.savingsPct * 100}%`}></div>
+        </div>
+        <p class="budget-delta" data-bind="savingsDelta">
+          {budget.savingsDeltaDollars > 0 ? `${formatUSD(budget.savingsDeltaDollars)} over target` : `${formatUSD(Math.abs(budget.savingsDeltaDollars))} under target`}
+        </p>
+      </div>
+    </div>
+
+    <div class="share-row">
+      <label class="field">
+        <span>Share this exact scenario</span>
+        <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
+      </label>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initBudgetCalculator } from "../../scripts/budgetCalculatorClient";
+  initBudgetCalculator();
+</script>
+
+<style>
+  .budget-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .budget-bar-label {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    font-size: var(--text-body-sm-size);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .budget-bar-label span:first-child {
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-right: auto;
+  }
+
+  .target-note {
+    color: var(--color-mute);
+  }
+
+  .budget-bar-track {
+    position: relative;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--color-hairline-soft);
+    overflow: visible;
+    border: 1px solid var(--color-hairline);
+  }
+
+  .budget-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.15s ease;
+  }
+
+  .fill-needs {
+    background: var(--color-comfortable);
+  }
+  .fill-wants {
+    background: var(--color-stretch);
+  }
+  .fill-savings {
+    background: var(--color-link);
+  }
+
+  .budget-bar-target {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 18px;
+    background: var(--color-ink);
+  }
+
+  .budget-delta {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-top: var(--space-xxs);
+  }
+</style>

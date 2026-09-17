@@ -1,0 +1,74 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { scenarioOgCopy } from "../../lib/seo";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "Calculadora de Asequibilidad de Vivienda — ¿Cuánta Casa Puedo Pagar? | TrueAfford";
+const description =
+  "Esta calculadora de asequibilidad de vivienda responde cuánta casa puedes realmente pagar contando cuidado infantil, alimentos, salud y transporte — no solo la razón deuda-ingreso. Incluye impuesto predial y seguro a nivel estatal, sin anuncios en el resultado.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="home-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Asequibilidad de Vivienda"
+    heading="¿Cuánta casa puedes realmente pagar?"
+    intro="Todas las demás calculadoras se detienen en la razón deuda-ingreso y ya. Esta sigue adelante: cuidado infantil, alimentos, salud y transporte cuentan, porque que un prestamista los ignore no significa que tu cuenta bancaria también lo haga."
+    faqs={[
+      {
+        question: "¿Por qué esta calculadora pregunta sobre cuidado infantil y alimentos?",
+        answer:
+          "Porque los prestamistas no los cuentan, pero tú igual tienes que pagarlos. Un hogar puede pasar todas las razones de deuda a ingreso que un prestamista verifica y aun así quedarse sin dinero cada mes una vez que entran en juego los gastos reales. Esta calculadora ejecuta una prueba de ingreso sobrante independiente después de las razones estándar, específicamente para detectar ese caso.",
+      },
+      {
+        question: "¿Cuál es la diferencia entre los números de 'aprobación del prestamista' y 'sostenible'?",
+        answer:
+          "El número de aprobación del prestamista es lo que la matemática de deuda a ingreso de un prestamista permitiría generosamente. El número sostenible es lo que el presupuesto mensual real de tu hogar — después de gastos reales — puede sostener sin volverse negativo. Suelen ser distintos, y la brecha entre ellos vale la pena tenerla en cuenta.",
+      },
+      {
+        question: "¿Por qué Cómodo, Ajustado y Riesgoso dan números diferentes?",
+        answer:
+          "Son tres tolerancias de riesgo distintas, no tres fórmulas distintas. Cómodo mantiene bajos los costos de vivienda y un colchón real en tu presupuesto. Ajustado permite un presupuesto más apretado pero aún equilibrado. Riesgoso es lo máximo que las razones de un prestamista por sí solas permitirían, sin requerir ningún colchón — por eso se llama riesgoso.",
+      },
+      {
+        question: "¿Esto incluye el impuesto predial y el seguro de mi estado?",
+        answer:
+          "Sí. Las tasas de impuesto predial y seguro varían enormemente según el estado — el impuesto predial por sí solo va de aproximadamente 0.27% a 2.2% del valor de la vivienda al año según dónde vivas. Las calculadoras de promedio nacional se pierden esto. Cada número aquí usa la tasa de tu estado seleccionado, documentada en la página de metodología.",
+      },
+      {
+        question: "¿Esto es diferente de una calculadora de asequibilidad hipotecaria?",
+        answer:
+          "Una calculadora típica de asequibilidad hipotecaria o de préstamo de vivienda trabaja hacia atrás desde un monto de préstamo que un prestamista aprobaría. Esta trabaja hacia adelante desde tu presupuesto real — ingreso, deudas y gastos reales — y luego muestra ambos números lado a lado, para que veas dónde divergen la aprobación del prestamista y la sostenibilidad de tu hogar.",
+      },
+      {
+        question: "Gano $70,000 al año, ¿cuánta casa puedo pagar?",
+        answer:
+          "Con $70,000 al año (unos $5,833/mes brutos), una razón inicial estándar del 28% coloca tu presupuesto de vivienda alrededor de $1,630/mes, lo cual — dependiendo de tu tasa de interés, enganche, impuesto predial y seguro — a menudo cae en un rango de precio de vivienda de aproximadamente $220,000 a $280,000. Esa cifra se mueve mucho según tus deudas existentes, el tamaño de tu enganche y tus gastos mensuales reales, así que vale la pena ingresar tus números reales en la calculadora de arriba en lugar de confiar en una regla general.",
+      },
+      {
+        question: "¿Cuánto puedo pagar para comprar una casa?",
+        answer:
+          "Empieza con tu ingreso bruto y resta los pagos de deuda existentes para ver qué permitirían las razones de un prestamista — luego resta tus gastos mensuales reales (cuidado infantil, alimentos, salud, transporte) para ver qué puede realmente sostener tu presupuesto. La brecha entre esos dos números suele ser más grande de lo que la gente espera. Usa la calculadora de arriba para obtener ambas cifras usando tu ingreso, deudas, enganche y estado reales.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Calculadora de hipoteca" },
+      { href: localizedPath(locale, "house-affordability-calculator"), label: "Calculadora de asequibilidad de casa" },
+      { href: localizedPath(locale, "methodology"), label: "Metodología" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

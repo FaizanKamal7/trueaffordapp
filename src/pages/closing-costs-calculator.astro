@@ -1,0 +1,57 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import ClosingCostsCalculator from "../components/calculator/ClosingCostsCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeResults } from "../lib/state/computeResults";
+import { estimateClosingCosts } from "../lib/engine/closingCosts";
+import { formatUSD } from "../lib/format";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const homePrice = scenario.evaluatedHomePrice ?? computeResults(scenario).defaultEvaluatedPrice;
+const closingCosts = estimateClosingCosts(homePrice, scenario.downPaymentDollars);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Closing Costs Calculator — The Cash You Need Beyond the Down Payment | TrueAfford";
+const description = "Closing costs run 2-5% of home price, paid in cash on top of your down payment. See the range for your specific price, called out separately so it doesn't blindside you.";
+
+const ogTitle = hasScenario ? `Typical closing costs: ${formatUSD(closingCosts.typical)} on a ${formatUSD(homePrice)} home — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="closing-costs-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Closing Costs Calculator"
+    heading="The cash you need beyond the down payment"
+    intro="Closing costs are frequently what derails a first-time buyer who budgeted only for the down payment. This shows the real range in cash — 2% to 5% of the home price — on top of what you're already setting aside."
+    faqs={[
+      {
+        question: "What's actually included in closing costs?",
+        answer:
+          "Lender origination fees, title insurance and search fees, appraisal and inspection costs, recording fees, prepaid property tax and insurance, and similar one-time charges. The exact mix varies by state and lender, which is why this is shown as a range rather than a single number.",
+      },
+      {
+        question: "Can closing costs be rolled into the loan?",
+        answer:
+          "Sometimes, depending on loan type and lender — but that increases your loan balance and the interest you pay over time. This calculator treats them as cash needed at closing, which is the more conservative and more common default assumption.",
+      },
+      {
+        question: "Why a range instead of one number?",
+        answer:
+          "Because the real figure depends on your state, lender, and loan type in ways a generic calculator can't know precisely. The 2-5% range is wide enough to be honest about that uncertainty while still being useful for budgeting.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Mortgage calculator" },
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Home affordability calculator" },
+      { href: localizedPath(locale, "amortization-schedule-calculator"), label: "Amortization schedule calculator" },
+    ]}
+  >
+    <ClosingCostsCalculator />
+  </CalculatorPageShell>
+</Layout>

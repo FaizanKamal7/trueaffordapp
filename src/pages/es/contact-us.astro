@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const title = "Contáctanos — TrueAfford";
+const description = "Ponte en contacto con TrueAfford sobre un resultado de calculadora, una fuente de datos o un error.";
+const contactEmail = "support@trueaffordapp.com";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="contact-us">
+  <section class="container doc-hero">
+    <p class="eyebrow">Contáctanos</p>
+    <h1>Ponte en contacto</h1>
+    <p class="intro">No hay chat de soporte ni sistema de tickets — solo correo electrónico. Envía un mensaje y te responderemos.</p>
+  </section>
+
+  <section class="container doc-section" id="email">
+    <h2>Correo electrónico</h2>
+    <p>
+      Para preguntas sobre un resultado de calculadora, una fuente de datos que parezca desactualizada, un error, o cualquier otra cosa: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+    </p>
+    <a class="btn-primary" href={`mailto:${contactEmail}`}>Escríbenos</a>
+  </section>
+
+  <section class="container doc-section" id="before-you-write">
+    <h2>Antes de escribirnos</h2>
+    <ul>
+      <li>Las preguntas sobre cómo se calcula un número suelen responderse en la <a href={localizedPath(locale, "methodology")}>página de metodología</a>, que documenta cada fórmula, suposición y fuente de datos.</li>
+      <li>Este sitio no puede dar asesoría financiera o crediticia personalizada — es una calculadora, no un asesor.</li>
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .btn-primary {
+    display: inline-block;
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    min-height: 44px;
+    line-height: 24px;
+    margin-top: var(--space-xs);
+  }
+
+  .btn-primary:hover {
+    text-decoration: none;
+  }
+</style>

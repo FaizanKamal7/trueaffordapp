@@ -1,0 +1,56 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import RentAffordabilityCalculator from "../../components/calculator/RentAffordabilityCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeRentResults } from "../../lib/state/computeRentResults";
+import { formatUSD } from "../../lib/format";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeRentResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Asequibilidad de Alquiler — Lo Que Realmente Puedes Pagar de Renta | TrueAfford";
+const description = "Una calculadora de alquiler que verifica las tres restricciones reales: 30% del ingreso, la regla de evaluación 40x de los arrendadores, y una prueba de ingreso sobrante que la mayoría de las calculadoras omite por completo.";
+
+const ogTitle = hasScenario ? `Este hogar puede pagar hasta ${formatUSD(results.rentAffordability.maxAffordableRent)}/mes de alquiler — TrueAfford` : undefined;
+const ogDescription = hasScenario ? "Ve el desglose completo de las tres reglas de asequibilidad de alquiler y cuál de ellas es la más restrictiva." : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} ogDescription={ogDescription} locale={locale} translationSlug="rent-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Asequibilidad de Alquiler"
+    heading="¿Cuánto puedes realmente pagar de alquiler?"
+    intro="La mayoría de las calculadoras de alquiler te muestran un solo número: 30% de tu ingreso. Esta verifica eso, más la regla de evaluación del arrendador que casi nadie explica, más si tu presupuesto realmente sobrevive al alquiler después del seguro de inquilino, los servicios y los gastos reales."
+    faqs={[
+      {
+        question: "¿Por qué hay tres números diferentes?",
+        answer:
+          "Porque tres cosas independientes pueden impedirte obtener o mantener un apartamento a una renta dada: la pauta informal del 30% del ingreso, la verificación formal de ingresos de un arrendador, y si tu propio presupuesto realmente sobrevive al pago. El menor de los tres es tu límite real.",
+      },
+      {
+        question: "¿Qué es la regla del 40x, y por qué importa?",
+        answer:
+          "Muchos arrendadores exigen que el ingreso bruto anual sea al menos 40 veces el alquiler mensual antes de aprobar una solicitud. Resulta que esto es matemáticamente idéntico a la regla del 30% del ingreso — pero los arrendadores la aplican estrictamente sobre el ingreso bruto verificado, sin margen para el redondeo o el optimismo que la gente aplica a sus propias cuentas mentales.",
+      },
+      {
+        question: "¿Por qué cuenta aquí el seguro de inquilino?",
+        answer:
+          "Es un costo mensual real, generalmente obligatorio, de alquilar que un simple cálculo del 30% del ingreso ignora. Esta calculadora lo incluye — junto con los servicios — en la prueba de ingreso sobrante, ya que ese es el número que determina si el alquiler realmente encaja en tu presupuesto.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Calculadora de alquilar vs. comprar" },
+      { href: localizedPath(locale, "budget-calculator"), label: "Calculadora de presupuesto" },
+    ]}
+  >
+    <RentAffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

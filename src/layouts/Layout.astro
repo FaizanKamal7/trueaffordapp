@@ -1,23 +1,144 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import Nav from "../components/layout/Nav.astro";
+import Footer from "../components/layout/Footer.astro";
+import StickyLegalBar from "../components/layout/StickyLegalBar.astro";
+import "../styles/global.css";
+import { DEFAULT_LOCALE, LOCALES, getLocale, localizedPath, type LocaleCode } from "../i18n/locales";
+import { CHROME } from "../i18n/chrome";
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+interface Props {
+  title: string;
+  description: string;
+  /** Overrides for social previews when they should differ from title/description (e.g. a live-computed scenario headline) */
+  ogTitle?: string;
+  ogDescription?: string;
+  /** Current page locale; defaults to English. */
+  locale?: LocaleCode;
+  /** Optional robots directive for utility pages that should not be indexed. */
+  robots?: string;
+  /**
+   * Path slug (without locale prefix) shared by every translated version of this page —
+   * "" for the home page, otherwise e.g. "mortgage-calculator". Pages that aren't
+   * translated (404, salary/state, etc.) should omit this to skip hreflang tags.
+   */
+  translationSlug?: string;
+}
+
+const { title, description, ogTitle, ogDescription, locale = DEFAULT_LOCALE, translationSlug, robots } = Astro.props;
+const localeConfig = getLocale(locale);
+const t = CHROME[locale];
+// Calculator scenarios are encoded in query parameters. They remain shareable,
+// but all variants consolidate their indexing signals at the stable page URL.
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const ogImageURL = new URL("/og-default.png", Astro.site ?? Astro.url.origin);
+// Calculator pages use a long-form title as source copy. Keep the primary
+// keyword and brand in the document title; the fuller text remains available
+// for descriptions and social previews.
+const documentTitle = translationSlug?.endsWith("-calculator") && title.includes(" — ")
+  ? `${title.split(" — ")[0]} | TrueAfford`
+  : title;
+// Interior pages (anything with a translationSlug) get a two-level Home > Page
+// breadcrumb; the homepage ("" slug) and untranslated utility pages (404, etc.) skip it.
+const breadcrumbName = documentTitle.replace(/\s*[|—-]\s*TrueAfford$/, "");
+const breadcrumbSchema = translationSlug
+  ? {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: new URL(localizedPath(locale, ""), Astro.site ?? Astro.url.origin).toString() },
+        { "@type": "ListItem", position: 2, name: breadcrumbName, item: canonicalURL.toString() },
+      ],
+    }
+  : undefined;
+---
+
+<!doctype html>
+<html lang={localeConfig.hreflang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="TrueAfford" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
+    <link rel="canonical" href={canonicalURL} />
+
+    {
+      translationSlug !== undefined && (
+        <>
+          {LOCALES.map((l) => (
+            <link rel="alternate" hreflang={l.hreflang} href={new URL(localizedPath(l.code, translationSlug), Astro.site ?? Astro.url.origin).toString()} />
+          ))}
+          <link rel="alternate" hreflang="x-default" href={new URL(localizedPath(DEFAULT_LOCALE, translationSlug), Astro.site ?? Astro.url.origin).toString()} />
+        </>
+      )
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TrueAfford" />
+    <meta property="og:locale" content={localeConfig.ogLocale} />
+    <meta property="og:title" content={ogTitle ?? title} />
+    <meta property="og:description" content={ogDescription ?? description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="TrueAfford — the affordability calculator with nothing to sell you" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle ?? title} />
+    <meta name="twitter:description" content={ogDescription ?? description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-600CD7HX6F"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-600CD7HX6F');
+    </script>
+
+    <script is:inline>
+      try {
+        const savedTheme = localStorage.getItem("trueafford-theme");
+        const theme = savedTheme === "dark" || savedTheme === "light"
+          ? savedTheme
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "TrueAfford",
+      url: (Astro.site ?? Astro.url.origin).toString(),
+      description: "A free affordability calculator suite for home, mortgage, rent, and car buying decisions — real expenses, state-level data, no ads in the result.",
+    })} />
+    {breadcrumbSchema && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skipToContent}</a>
+    <Nav locale={locale} translationSlug={translationSlug} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+    <StickyLegalBar locale={locale} />
+  </body>
+</html>

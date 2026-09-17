@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { scenarioOgCopy } from "../../lib/seo";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "Calculadora de Asequibilidad Hipotecaria — Pago Mensual Completo, Impuesto y Seguro Estatal | TrueAfford";
+const description =
+  "Una calculadora de asequibilidad hipotecaria y de préstamo de vivienda en una sola, sin anuncios de prestamistas en los resultados. Desglose mensual completo — principal, interés, impuesto predial estatal, seguro, PMI, HOA y mantenimiento — más lo que realmente puedes pagar, no solo lo que un prestamista aprueba.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="mortgage-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Hipoteca"
+    heading="Una calculadora de hipoteca que no te vende nada"
+    intro="Todas las demás calculadoras de hipoteca en línea pertenecen a una empresa que gana dinero cuando solicitas un préstamo. Esta no vende contactos, así que no tiene incentivo para mostrarte un número más grande de lo que realmente puedes pagar."
+    faqs={[
+      {
+        question: "¿En qué se diferencia esto de la calculadora de un banco?",
+        answer:
+          "La calculadora de un banco muestra para qué calificarías. Esta también muestra ese número, pero lo pone junto a lo que tu hogar realmente puede sostener una vez que se toman en cuenta los gastos mensuales reales — los dos suelen ser distintos, y la brecha importa.",
+      },
+      {
+        question: "¿El pago incluye impuestos y seguro?",
+        answer:
+          "Sí — principal, interés, impuesto predial (específico del estado, no un promedio nacional), seguro de vivienda, PMI cuando tu enganche es menor al 20%, cuotas de HOA si las tienes, y una reserva de mantenimiento. Cada línea se desglosa por separado y es editable.",
+      },
+      {
+        question: "¿Puedo compartir mis resultados con alguien?",
+        answer:
+          "Sí — cada dato que cambies actualiza automáticamente la URL de la página. Copia el enlace al final de los resultados y envíalo a quien quieras; se abre con exactamente los mismos números, calculados de nuevo, no una captura de pantalla.",
+      },
+      {
+        question: "¿Qué supuestos de puntaje crediticio usa esto?",
+        answer:
+          "Elige tu banda de crédito y la calculadora aplica una tasa de interés y un costo de PMI predeterminados y realistas para ese nivel, ambos documentados en la página de metodología. Puedes anular la tasa de interés directamente si tienes una cotización específica.",
+      },
+      {
+        question: "¿Una calculadora de asequibilidad hipotecaria es lo mismo que una calculadora de asequibilidad de préstamo de vivienda?",
+        answer:
+          "Sí — 'calculadora de asequibilidad hipotecaria' y 'calculadora de asequibilidad de préstamo de vivienda' describen lo mismo: calcular el pago mensual y el precio que un préstamo de vivienda soporta. Esta añade los datos de impuesto y seguro específicos del estado, y la comparación entre aprobación del prestamista y sostenibilidad, que la mayoría de las versiones de esta herramienta omiten.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Calculadora de asequibilidad de vivienda" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Calculadora de alquilar vs. comprar" },
+      { href: localizedPath(locale, "methodology"), label: "Metodología" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

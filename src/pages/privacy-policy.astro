@@ -1,0 +1,75 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const title = "Privacy Policy — TrueAfford";
+const description = "TrueAfford's privacy policy: what we collect (almost nothing), what runs entirely in your browser, and the one third party involved.";
+const contactEmail = "support@trueaffordapp.com";
+const lastUpdated = "September 16, 2026";
+---
+
+<Layout title={title} description={description}>
+  <section class="container doc-hero">
+    <p class="eyebrow">Privacy Policy</p>
+    <h1>What we collect: almost nothing</h1>
+    <p class="intro">
+      TrueAfford doesn't have accounts, doesn't run ads, and doesn't sell leads — so there's very little reason for this site to collect data about you in the first place. This page explains exactly what happens to the
+      information you type in and what, if anything, we or our service providers see.
+    </p>
+    <p class="doc-updated">Last updated: {lastUpdated}</p>
+  </section>
+
+  <section class="container doc-section" id="calculators">
+    <h2>Calculator inputs stay in your browser</h2>
+    <p>
+      Every number you enter into a calculator — income, debts, expenses, home price, and so on — is used to run the calculation entirely on your device. None of it is sent to, processed by, or stored on our servers.
+      Closing the tab or refreshing the page clears it. We have no record of what any visitor has calculated.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="accounts">
+    <h2>No accounts, no profiles</h2>
+    <p>There is no sign-up, no login, and no user profile anywhere on this site. We don't build a history of who you are or what you've looked at.</p>
+  </section>
+
+  <section class="container doc-section" id="automatic-data">
+    <h2>Information collected automatically</h2>
+    <p>
+      Like any website, basic technical information — such as IP address, browser type, and the pages requested — passes through our hosting and content-delivery provider (Cloudflare) as part of serving the site and
+      protecting it from abuse. We don't run our own analytics, tracking pixels, or advertising scripts, and we don't add our own cookies. Cloudflare's handling of this operational data is governed by its own privacy
+      policy.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="third-parties">
+    <h2>Third-party services we use</h2>
+    <p>
+      Page fonts are loaded from Google Fonts (<code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code>), which means your browser makes a direct request to Google's servers to fetch them, exposing your IP
+      address to Google in the same way any external resource would. We don't use Google Analytics, Google Ads, or any other Google service beyond font delivery. No other third-party scripts run on this site.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="contact-data">
+    <h2>If you email us</h2>
+    <p>
+      If you reach out via the <a href="/contact-us">contact page</a>, we'll have whatever information is in that email — your address and message content — which we use only to respond to you. We don't add contacts to a
+      marketing list or share correspondence with third parties.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="children">
+    <h2>Children's privacy</h2>
+    <p>This site is not directed at children under 13, and we do not knowingly collect information from them.</p>
+  </section>
+
+  <section class="container doc-section" id="changes">
+    <h2>Changes to this policy</h2>
+    <p>
+      If what this site collects or how it's handled ever changes, this page will be updated and the date at the top will change accordingly. We won't quietly start collecting more than what's described here.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="contact">
+    <h2>Contact</h2>
+    <p>Questions about this policy: <a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
+  </section>
+</Layout>

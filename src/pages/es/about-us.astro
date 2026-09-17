@@ -1,0 +1,57 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const title = "Sobre Nosotros — TrueAfford";
+const description = "Por qué existe TrueAfford: un conjunto de calculadoras de asequibilidad sin anuncios de prestamistas, sin formularios de contacto, y con cada fórmula documentada abiertamente.";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="about-us">
+  <section class="container doc-hero">
+    <p class="eyebrow">Sobre Nosotros</p>
+    <h1>Una calculadora de asequibilidad que no vende nada</h1>
+    <p class="intro">
+      TrueAfford se construyó a partir de una observación simple: casi todas las calculadoras de asequibilidad de vivienda, hipoteca, alquiler y auto en línea pertenecen a una empresa que gana dinero cuando el número que te muestra es más grande — un prestamista, un
+      portal inmobiliario o un negocio de generación de contactos. Este sitio no tiene contactos que vender, así que no tiene razón para inflar la respuesta.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="mission">
+    <h2>Qué intentamos hacer</h2>
+    <p>
+      Darte una respuesta directa a "qué puedo realmente pagar" — usando tu ingreso real, tus deudas reales y gastos reales como cuidado infantil, salud y alimentos que la mayoría de las calculadoras omite por completo. Cada resultado
+      muestra tanto lo que un prestamista probablemente aprobaría como lo que tu hogar puede realmente sostener mes tras mes, porque esos dos números suelen ser distintos, y la brecha entre ellos importa más que cualquiera de los dos números
+      por sí solo.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="how">
+    <h2>En qué es diferente</h2>
+    <ul>
+      <li>Sin anuncios, sin ubicaciones de prestamistas, y sin "ofertas recomendadas" junto a tu resultado.</li>
+      <li>Sin cuenta, sin muro de correo electrónico, y sin formularios de captación de clientes entre tú y un número.</li>
+      <li>Datos de impuesto predial y seguro a nivel estatal en lugar de un único promedio nacional.</li>
+      <li>Una reserva de mantenimiento incluida por defecto — un costo real de ser propietario que la mayoría de las calculadoras omite en silencio.</li>
+      <li>Cada fórmula, suposición y fuente de datos publicada en la <a href={localizedPath(locale, "methodology")}>página de metodología</a>, fechada y con su fuente, para que pueda verificarse en lugar de confiar en ella a ciegas.</li>
+    </ul>
+    <p>Todos los cálculos se ejecutan en tu navegador. Nada de lo que escribas en una calculadora se envía o se almacena en nuestros servidores — consulta la <a href="/privacy-policy">política de privacidad</a> para más detalles.</p>
+  </section>
+
+  <section class="container doc-section" id="who">
+    <h2>Quién construyó esto</h2>
+    <p>
+      {/* TODO: replace with your real name, a short bio, and why you built TrueAfford — a named, accountable author matters most on a financial-advice site like this one. */}
+      TrueAfford está construido y mantenido por <strong>[Tu Nombre]</strong>, [una o dos oraciones sobre tu experiencia profesional, por qué te importa la asequibilidad de vivienda, o qué te llevó a construir esto]. Si tienes
+      preguntas sobre la metodología o quieres reportar un error, consulta <a href={localizedPath(locale, "contact-us")}>contáctanos</a> abajo.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="contact">
+    <h2>Preguntas o correcciones</h2>
+    <p>
+      Si un número parece incorrecto, una fuente de datos está desactualizada, o algo en el sitio está fallando, nos gustaría saberlo de verdad — <a href={localizedPath(locale, "contact-us")}>ponte en contacto</a>.
+    </p>
+  </section>
+</Layout>

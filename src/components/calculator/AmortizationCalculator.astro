@@ -1,0 +1,182 @@
+---
+import { decodeScenario, scenarioToQueryString } from "../../lib/state/serialize";
+import { computeAmortizationResults } from "../../lib/state/computeAmortizationResults";
+import { PROPERTY_TAX_BY_STATE } from "../../lib/data/property-tax-by-state";
+import { CREDIT_BANDS } from "../../lib/data/pmi-rates";
+import { getDefaultInterestRate } from "../../lib/data/interest-rates-by-credit-band";
+import { formatUSD, formatPct } from "../../lib/format";
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeAmortizationResults(scenario);
+const { amortization } = results;
+
+const stateList = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.state.localeCompare(b.state));
+const defaultRatePct = getDefaultInterestRate(scenario.creditBand, scenario.termYears) * 100;
+
+const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), Astro.site ?? Astro.url.origin).toString();
+
+function monthsToYearsMonths(months: number): string {
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  if (y === 0) return `${m} mo`;
+  if (m === 0) return `${y} yr`;
+  return `${y} yr ${m} mo`;
+}
+---
+
+<div class="calculator-grid" data-amortization-calculator>
+  <form id="amortization-form" class="calculator-form-col" method="get">
+    <fieldset class="field-group">
+      <legend>Loan</legend>
+      <label class="field">
+        <span>Home price</span>
+        <input type="number" inputmode="numeric" name="ep" id="field-ep" min="0" step="1000" value={scenario.evaluatedHomePrice ?? results.homePrice} />
+      </label>
+      <label class="field">
+        <span>Down payment</span>
+        <input type="number" inputmode="numeric" name="dp" id="field-dp" min="0" step="1000" value={scenario.downPaymentDollars} />
+      </label>
+      <label class="field">
+        <span>Credit score band</span>
+        <select name="cb" id="field-cb">
+          {
+            CREDIT_BANDS.map((band) => (
+              <option value={band} selected={band === scenario.creditBand}>
+                {band}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+      <label class="field">
+        <span>Interest rate override (%)</span>
+        <input
+          type="number"
+          inputmode="decimal"
+          name="ir"
+          id="field-ir"
+          min="0"
+          max="20"
+          step="0.05"
+          placeholder={defaultRatePct.toFixed(2)}
+          value={scenario.interestRateOverride !== undefined ? (scenario.interestRateOverride * 100).toFixed(2) : ""}
+        />
+      </label>
+      <fieldset class="field-inline">
+        <legend>Loan term</legend>
+        <label><input type="radio" name="tm" value="30" checked={scenario.termYears === 30} /> 30-year</label>
+        <label><input type="radio" name="tm" value="15" checked={scenario.termYears === 15} /> 15-year</label>
+      </fieldset>
+      <label class="field">
+        <span>Extra monthly payment</span>
+        <input type="number" inputmode="numeric" name="xp" id="field-xp" min="0" step="25" value={scenario.extraMonthlyPayment} />
+      </label>
+    </fieldset>
+
+    <noscript>
+      <button type="submit" class="btn-primary">Calculate</button>
+    </noscript>
+  </form>
+
+  <div class="results-col" id="amortization-results" aria-live="polite">
+    <div>
+      <p class="eyebrow">Amortization schedule</p>
+      <h2>
+        Loan amount <strong id="loan-amount" data-bind="loanAmount">{formatUSD(results.loanAmount)}</strong>
+      </h2>
+    </div>
+
+    <div class="two-col-stats">
+      <div class="stat-block">
+        <p class="stat-label">Payoff time</p>
+        <p class="stat-value" id="payoff-time" data-bind="payoffTime">{monthsToYearsMonths(amortization.payoffMonth)}</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-label">Total interest paid</p>
+        <p class="stat-value" id="total-interest" data-bind="totalInterest">{formatUSD(amortization.totalInterestPaid)}</p>
+      </div>
+    </div>
+
+    <div class="callout callout-positive" id="savings-callout" hidden={scenario.extraMonthlyPayment <= 0}>
+      <p class="stat-label">From your extra payment</p>
+      <p class="stat-value" id="interest-saved" data-bind="interestSaved">{formatUSD(amortization.interestSaved)} saved</p>
+      <p class="leftover-message" id="months-saved" data-bind="monthsSaved">
+        {amortization.monthsSaved} months removed from the loan
+      </p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="year-table" id="year-table">
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Principal paid</th>
+            <th>Interest paid</th>
+            <th>Ending balance</th>
+          </tr>
+        </thead>
+        <tbody id="year-table-body">
+          {
+            amortization.yearlySummary.map((y) => (
+              <tr>
+                <td>{y.year}</td>
+                <td>{formatUSD(y.totalPrincipal + y.totalExtraPayment)}</td>
+                <td>{formatUSD(y.totalInterest)}</td>
+                <td>{formatUSD(y.endingBalance)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="share-row">
+      <label class="field">
+        <span>Share this exact scenario</span>
+        <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
+      </label>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initAmortizationCalculator } from "../../scripts/amortizationCalculatorClient";
+  initAmortizationCalculator();
+</script>
+
+<style>
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+  }
+
+  .year-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-body-sm-size);
+  }
+
+  .year-table th,
+  .year-table td {
+    text-align: left;
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--color-hairline-soft);
+    white-space: nowrap;
+  }
+
+  .year-table th {
+    color: var(--color-mute);
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    background: var(--color-canvas-elevated);
+  }
+
+  .leftover-message {
+    font-size: var(--text-body-sm-size);
+    margin-top: var(--space-xxs);
+  }
+</style>

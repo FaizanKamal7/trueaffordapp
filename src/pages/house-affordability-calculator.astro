@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeResults } from "../lib/state/computeResults";
+import { scenarioOgCopy } from "../lib/seo";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "House Affordability Calculator — The True Cost of Owning, Not Just Borrowing | TrueAfford";
+const description =
+  "This house affordability calculator shows the true monthly cost of owning a house before you buy a house: principal, interest, property tax, insurance, PMI, and a real 1%-of-value maintenance reserve most calculators skip entirely.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="house-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="House Affordability Calculator"
+    heading="What a house actually costs you every month"
+    intro="A mortgage payment is not the cost of owning a house. This calculator adds the piece almost everyone forgets — a maintenance reserve — on top of principal, interest, tax, insurance, and PMI, so the number you see is the number you'll actually pay."
+    faqs={[
+      {
+        question: "Why is there a maintenance line I didn't ask for?",
+        answer:
+          "Because it's a real, unavoidable cost of owning a house, and most calculators quietly drop it to make the number look smaller. This one budgets 1% of home value per year by default — roofs, water heaters, and HVAC systems don't wait for a convenient time to fail.",
+      },
+      {
+        question: "When does PMI go away?",
+        answer:
+          "Private mortgage insurance is required whenever your down payment is under 20%. By federal law, it automatically cancels once your loan balance amortizes down to 78% of the home's original value — this calculator shows you the actual month that happens, rather than pretending PMI is a permanent cost or a non-existent one.",
+      },
+      {
+        question: "Is a 15-year or 30-year term cheaper?",
+        answer:
+          "A 15-year term carries a lower interest rate and builds equity far faster, but the monthly payment is meaningfully higher for the same loan amount. Toggle the loan term in the calculator to see both the monthly payment and the total cost difference for your specific numbers.",
+      },
+      {
+        question: "What if I put down less than 20%?",
+        answer:
+          "You'll pay PMI until you cross the 78% loan-to-value line, which this calculator itemizes as its own line in the monthly breakdown — along with what an additional down payment would need to be to skip it entirely.",
+      },
+      {
+        question: "How much house affordability do I need before I buy a house?",
+        answer:
+          "Before you buy a house, run your numbers here first, not at the lender's desk. House affordability isn't just the price a lender will approve — it's the price that still leaves room in your budget after tax, insurance, PMI, and maintenance. This calculator shows both figures so you're negotiating from your own number, not theirs.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Home affordability calculator" },
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Mortgage calculator" },
+      { href: localizedPath(locale, "methodology"), label: "Methodology" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import CalculatorPageShell from "../../components/calculator/CalculatorPageShell.astro";
+import AmortizationCalculator from "../../components/calculator/AmortizationCalculator.astro";
+import { decodeScenario } from "../../lib/state/serialize";
+import { computeAmortizationResults } from "../../lib/state/computeAmortizationResults";
+import { formatUSD } from "../../lib/format";
+import { localizedPath } from "../../i18n/locales";
+
+const locale = "es" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeAmortizationResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Calculadora de Tabla de Amortización — Ve el Interés Ahorrado con Pagos Extra | TrueAfford";
+const description = "Una tabla de amortización completa año por año con un pago mensual extra opcional, que muestra exactamente cuánto interés ahorrarías y cuántos meses le quitarías al préstamo.";
+
+const ogTitle = hasScenario && scenario.extraMonthlyPayment > 0 ? `Los pagos extra ahorran ${formatUSD(results.amortization.interestSaved)} en interés — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="amortization-schedule-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Calculadora de Tabla de Amortización"
+    heading="Lo que un pago extra realmente le hace a tu préstamo"
+    intro="Un extra de $200 al mes suena pequeño. Aplicado directamente al principal, puede quitarle años a una hipoteca y decenas de miles en interés — esta calculadora te muestra exactamente cuánto, año por año, no solo la cifra principal."
+    faqs={[
+      {
+        question: "¿A dónde va el dinero del pago extra?",
+        answer:
+          "Directo al principal, encima de tu pago regular. Como el interés se calcula sobre el saldo restante cada mes, reducir ese saldo más rápido significa que se acumula menos interés durante el resto del préstamo — lo cual se traduce en ahorros reales.",
+      },
+      {
+        question: "¿Pagar extra siempre es la decisión correcta?",
+        answer:
+          "No necesariamente — depende de tu tasa comparada con lo que podrías ganar invirtiendo ese dinero en otro lugar, y de si tienes deuda con mayor interés que pagar primero. Esta calculadora te muestra el efecto mecánico sobre el préstamo; es un dato para esa decisión, no la respuesta completa.",
+      },
+      {
+        question: "¿Por qué importa más la tabla anual que un total acumulado?",
+        answer:
+          "Porque el pago no es lineal — el saldo baja lentamente al principio y rápidamente cerca del final. Verlo año por año deja claro más o menos cuándo los pagos extra empiezan a marcar la mayor diferencia.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Calculadora de hipoteca" },
+      { href: localizedPath(locale, "closing-costs-calculator"), label: "Calculadora de costos de cierre" },
+      { href: localizedPath(locale, "methodology"), label: "Metodología" },
+    ]}
+  >
+    <AmortizationCalculator />
+  </CalculatorPageShell>
+</Layout>

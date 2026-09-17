@@ -1,0 +1,191 @@
+---
+import { DEFAULT_LOCALE, localizedPath, type LocaleCode } from "../../i18n/locales";
+import { CHROME } from "../../i18n/chrome";
+
+interface Props {
+  locale?: LocaleCode;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const t = CHROME[locale];
+
+const calculatorLinks = [
+  { href: localizedPath(locale, "home-affordability-calculator"), label: t.footer.homeAffordabilityCalculator },
+  { href: localizedPath(locale, "house-affordability-calculator"), label: t.footer.houseAffordabilityCalculator },
+  { href: localizedPath(locale, "mortgage-calculator"), label: t.footer.mortgageCalculator },
+  { href: localizedPath(locale, "rent-affordability-calculator"), label: t.footer.rentAffordabilityCalculator },
+  { href: localizedPath(locale, "rent-vs-buy-calculator"), label: t.footer.rentVsBuyCalculator },
+  { href: localizedPath(locale, "budget-calculator"), label: t.footer.budgetCalculator },
+  { href: localizedPath(locale, "amortization-schedule-calculator"), label: t.footer.amortizationScheduleCalculator },
+  { href: localizedPath(locale, "closing-costs-calculator"), label: t.footer.closingCostsCalculator },
+  { href: localizedPath(locale, "car-affordability-calculator"), label: t.footer.carAffordabilityCalculator },
+];
+
+// The by-income and by-state sections aren't translated yet, so these always point at the
+// English pages — flagged with lang/hreflang so assistive tech and crawlers on a non-English
+// page don't treat the destination as if it were in that page's language.
+const englishOnly = locale !== "en";
+const withEnglishOnlyTag = (label: string) => (englishOnly ? `${label} (EN)` : label);
+const browseLinks = [
+  { href: "/salary", label: withEnglishOnlyTag(t.footer.byIncome) },
+  { href: "/state", label: withEnglishOnlyTag(t.footer.byState) },
+];
+
+const companyLinks = [
+  { href: localizedPath(locale, "about-us"), label: t.footer.aboutUs },
+  { href: localizedPath(locale, "methodology"), label: t.footer.methodology },
+  { href: localizedPath(locale, "contact-us"), label: t.footer.contactUs },
+];
+
+// Privacy policy and terms aren't translated yet, so these always point at the English pages.
+const legalLinks = [
+  { href: "/privacy-policy", label: withEnglishOnlyTag(t.footer.privacyPolicy) },
+  { href: "/terms-and-conditions", label: withEnglishOnlyTag(t.footer.termsAndConditions) },
+];
+---
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <p class="wordmark">
+        <img src="/logo.png" alt="" width="28" height="28" class="logo-mark" />
+        TrueAfford
+      </p>
+      <p class="tagline">{t.footer.tagline}</p>
+    </div>
+
+    <div class="footer-links">
+      <div class="footer-col">
+        <p class="footer-col-heading">{t.footer.calculatorsHeading}</p>
+        <ul>
+          {
+            calculatorLinks.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-heading">{t.footer.browseHeading}</p>
+        <ul>
+          {
+            browseLinks.map((link) => (
+              <li>
+                <a href={link.href} lang={englishOnly ? "en" : undefined} hreflang={englishOnly ? "en" : undefined}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-heading">{t.footer.companyHeading}</p>
+        <ul>
+          {
+            companyLinks.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-heading">{t.footer.legalHeading}</p>
+        <ul>
+          {
+            legalLinks.map((link) => (
+              <li>
+                <a href={link.href} lang={englishOnly ? "en" : undefined} hreflang={englishOnly ? "en" : undefined}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+    margin-top: var(--space-4xl);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xl);
+    justify-content: space-between;
+    padding-block: var(--space-3xl);
+  }
+
+  .footer-brand {
+    max-width: 420px;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: 600;
+    font-size: var(--text-heading-md-size);
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+  }
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    filter: brightness(0);
+  }
+
+  :global(html[data-theme="dark"]) .logo-mark {
+    filter: none;
+  }
+
+  .tagline {
+    color: var(--color-body);
+    font-size: var(--text-body-md-size);
+    line-height: var(--text-body-md-leading);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--space-3xl);
+    flex-wrap: wrap;
+  }
+
+  .footer-col-heading {
+    font-size: var(--text-label-sm-size);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+  }
+
+  .footer-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .footer-col a {
+    color: var(--color-body);
+    text-decoration: none;
+    font-size: var(--text-body-md-size);
+  }
+
+  .footer-col a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+</style>

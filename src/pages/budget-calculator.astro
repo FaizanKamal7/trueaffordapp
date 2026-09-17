@@ -1,0 +1,56 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import BudgetCalculator from "../components/calculator/BudgetCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeBudgetResults } from "../lib/state/computeBudgetResults";
+import { formatPct } from "../lib/format";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeBudgetResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Monthly Budget Calculator — 50/30/20 Rule With Your Real Housing Payment | TrueAfford";
+const description =
+  "A monthly budget calculator that maps your real income, debts, and expenses onto the 50/30/20 rule, with your housing payment pulled straight from your affordability scenario — not a guess.";
+
+const ogTitle = hasScenario ? `Needs at ${formatPct(results.budget.needsPctOfNet)} of income vs. a 50% target — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="budget-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Monthly Budget Calculator"
+    heading="Where does your housing payment actually fit?"
+    intro="The 50/30/20 rule is a useful gut-check most people never actually run with their real numbers. This maps your income, debts, and expenses onto it directly — using the housing payment already computed from your affordability scenario, not a guess."
+    faqs={[
+      {
+        question: "How is 'Needs' calculated?",
+        answer:
+          "Your housing payment plus other debt payments, childcare, healthcare, groceries, and transportation. These are treated as obligatory — the things you'd struggle to cut quickly.",
+      },
+      {
+        question: "What counts as 'Wants'?",
+        answer:
+          "The 'Other' field from your real-life expenses — the closest this site's shared inputs get to discretionary spending. If you want a more precise wants figure, adjust that field on any calculator; it carries over here automatically.",
+      },
+      {
+        question: "Where does the housing number come from?",
+        answer:
+          "By default, it's the sustainable monthly payment already computed on the affordability calculators — principal, interest, tax, insurance, PMI, HOA, and maintenance, for your current scenario. You can override it directly if you're renting or testing a different figure.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Home affordability calculator" },
+      { href: localizedPath(locale, "rent-affordability-calculator"), label: "Rent affordability calculator" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Rent vs. buy calculator" },
+    ]}
+  >
+    <BudgetCalculator />
+  </CalculatorPageShell>
+</Layout>

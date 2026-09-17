@@ -1,0 +1,86 @@
+---
+import { DEFAULT_LOCALE, type LocaleCode } from "../../i18n/locales";
+import { CHROME } from "../../i18n/chrome";
+
+interface Faq {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  faqs: Faq[];
+  locale?: LocaleCode;
+  eyebrow?: string;
+}
+
+const { faqs, locale = DEFAULT_LOCALE, eyebrow } = Astro.props;
+const t = CHROME[locale].shell;
+---
+
+{
+  faqs.length > 0 && (
+    <section class="container faq">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h2>{t.faqHeading}</h2>
+      {faqs.map((faq) => (
+        <details>
+          <summary>{faq.question}</summary>
+          <p>{faq.answer}</p>
+        </details>
+      ))}
+    </section>
+  )
+}
+
+{
+  faqs.length > 0 && (
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      })}
+    />
+  )
+}
+
+<style>
+  .faq {
+    padding-bottom: var(--space-3xl);
+    max-width: 760px;
+  }
+
+  .faq .eyebrow {
+    margin-bottom: var(--space-sm);
+  }
+
+  .faq h2 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    margin-bottom: var(--space-md);
+  }
+
+  .faq details {
+    border-top: 1px solid var(--color-hairline);
+    padding-block: var(--space-md);
+  }
+
+  .faq summary {
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .faq p {
+    margin-top: var(--space-sm);
+    color: var(--color-body);
+    line-height: var(--text-body-lg-leading);
+  }
+</style>

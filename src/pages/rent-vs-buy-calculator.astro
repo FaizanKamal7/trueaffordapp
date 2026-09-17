@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import RentVsBuyCalculator from "../components/calculator/RentVsBuyCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeRentVsBuyResults } from "../lib/state/computeRentVsBuyResults";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeRentVsBuyResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Rent vs. Buy Calculator — Net Worth Over Time, Not Just Monthly Cost | TrueAfford";
+const description = "Compares buying and renting as two net-worth trajectories over time, accounting for equity, appreciation, and what the down payment would earn invested instead — not just a monthly payment side-by-side.";
+
+const choiceLabel = results.simulation.betterChoiceAtTenure === "roughly equal" ? "a roughly even call" : results.simulation.betterChoiceAtTenure === "buy" ? "buying" : "renting";
+const ogTitle = hasScenario ? `At ${results.tenureYears} years, this scenario favors ${choiceLabel} — TrueAfford` : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} locale={locale} translationSlug="rent-vs-buy-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Rent vs. Buy Calculator"
+    heading="Is buying actually better than renting here — or does it just feel that way?"
+    intro="Comparing a mortgage payment to rent misses the point. This runs a month-by-month simulation of both paths as net worth over time — home equity and appreciation on one side, what your down payment would earn invested on the other — so you can see when, if ever, buying actually pulls ahead."
+    faqs={[
+      {
+        question: "Why net worth instead of monthly payment?",
+        answer:
+          "A lower monthly payment doesn't mean a better financial outcome. Renting frees up the cash that would've gone to a down payment to be invested elsewhere, while buying builds equity as the loan amortizes and the home appreciates. Net worth captures both sides; a payment comparison captures neither.",
+      },
+      {
+        question: "What happens if I move before the breakeven year?",
+        answer:
+          "Selling costs — assumed at 6% of sale price for agent commission and closing — eat into home equity right away, which is why buying often loses to renting over short tenures even when the monthly payment is similar. The chart shows exactly when, if ever, that flips for your numbers.",
+      },
+      {
+        question: "What return does the model assume on invested cash?",
+        answer:
+          "6% annually by default on the money a renter isn't putting into a down payment or paying beyond their monthly rent. That's a real assumption, not a certainty — a lower or higher realistic return for your own situation will shift the breakeven year meaningfully.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Mortgage calculator" },
+      { href: localizedPath(locale, "rent-affordability-calculator"), label: "Rent affordability calculator" },
+      { href: localizedPath(locale, "methodology"), label: "Methodology" },
+    ]}
+  >
+    <RentVsBuyCalculator />
+  </CalculatorPageShell>
+</Layout>

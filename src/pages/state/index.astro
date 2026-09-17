@@ -1,0 +1,76 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { PROPERTY_TAX_BY_STATE } from "../../lib/data/property-tax-by-state";
+
+const states = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.state.localeCompare(b.state));
+
+const title = "Home Affordability by State — Browse All 50 States + DC | TrueAfford";
+const description = "See what a typical household can afford in any U.S. state, using each state's own property tax and homeowner's insurance data instead of a national average.";
+---
+
+<Layout title={title} description={description}>
+  <section class="container hero">
+    <p class="eyebrow">Home Affordability by State</p>
+    <h1>Browse by state</h1>
+    <p class="intro">Pick a state to see a baseline affordability snapshot using its own tax and insurance data, or use the full calculator to enter your household's exact numbers.</p>
+  </section>
+
+  <section class="container section">
+    <ul class="state-list">
+      {
+        states.map((entry) => (
+          <li>
+            <a href={`/state/${entry.stateCode.toLowerCase()}`}>{entry.state}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .section {
+    padding-bottom: var(--space-3xl);
+  }
+
+  .state-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .state-list a {
+    display: block;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    text-decoration: none;
+    font-size: var(--text-body-sm-size);
+  }
+
+  .state-list a:hover {
+    background: var(--color-hairline-soft);
+  }
+</style>

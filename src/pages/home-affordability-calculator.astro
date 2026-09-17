@@ -1,0 +1,69 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeResults } from "../lib/state/computeResults";
+import { scenarioOgCopy } from "../lib/seo";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "Home Affordability Calculator — How Much House Can I Afford? | TrueAfford";
+const description =
+  "This home affordability calculator answers how much house you can actually afford by counting childcare, groceries, healthcare, and transportation — not just debt-to-income. State-level property tax and insurance included, no ads in the result.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="home-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Home Affordability Calculator"
+    heading="How much house can you actually afford?"
+    intro="Every other calculator stops at debt-to-income and calls it a day. This one keeps going: childcare, groceries, healthcare, and transportation all count, because a lender ignoring them doesn't mean your bank account will."
+    faqs={[
+      {
+        question: "Why does this calculator ask about childcare and groceries?",
+        answer:
+          "Because lenders don't count them, but you still have to pay for them. A household can pass every debt-to-income ratio a lender checks and still run out of money each month once real expenses are in the picture. This calculator runs a separate leftover-income test after the standard ratios, specifically to catch that case.",
+      },
+      {
+        question: "What's the difference between the 'lender approval' and 'sustainable' numbers?",
+        answer:
+          "The lender-approval number is what a lender's debt-to-income math would generously allow. The sustainable number is what your household's actual monthly budget — after real expenses — can support without going negative. They're often different, and the gap between them is worth paying attention to.",
+      },
+      {
+        question: "Why do Comfortable, Stretch, and Risky give different numbers?",
+        answer:
+          "They're three different risk tolerances, not three different formulas. Comfortable keeps housing costs low and a real cushion in your budget. Stretch allows a tighter but still break-even budget. Risky is the most a lender's ratios alone would allow, with no cushion required — which is why it's labeled risky.",
+      },
+      {
+        question: "Does this include property tax and insurance for my state?",
+        answer:
+          "Yes. Property tax and insurance rates vary enormously by state — property tax alone ranges from roughly 0.27% to 2.2% of home value per year depending on where you live. National-average calculators miss this. Every number here uses your selected state's rate, documented on the methodology page.",
+      },
+      {
+        question: "Is this different from a mortgage affordability calculator?",
+        answer:
+          "A typical mortgage affordability calculator or home loan affordability calculator works backward from a loan amount a lender would approve. This one works forward from your actual budget — income, debts, and real expenses — then shows both numbers side by side, so you can see where lender approval and household sustainability diverge.",
+      },
+      {
+        question: "I make $70,000 a year, how much house can I afford?",
+        answer:
+          "At $70,000 a year (about $5,833/month gross), a standard 28% front-end ratio puts your housing budget around $1,630/month, which — depending on your interest rate, down payment, property tax, and insurance — often lands in the roughly $220,000–$280,000 home price range. That figure moves a lot based on your existing debts, down payment size, and real monthly expenses, so it's worth entering your actual numbers into the calculator above rather than relying on a rule of thumb.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "mortgage-calculator"), label: "Mortgage calculator" },
+      { href: localizedPath(locale, "house-affordability-calculator"), label: "House affordability calculator" },
+      { href: localizedPath(locale, "methodology"), label: "Methodology" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

@@ -1,0 +1,56 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import RentAffordabilityCalculator from "../components/calculator/RentAffordabilityCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeRentResults } from "../lib/state/computeRentResults";
+import { formatUSD } from "../lib/format";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeRentResults(scenario);
+const hasScenario = Astro.url.search !== "";
+
+const title = "Rent Affordability Calculator — What You Can Actually Afford to Rent | TrueAfford";
+const description = "A rent calculator that checks all three real constraints: 30% of income, the 40x landlord screening rule, and a leftover-income test most calculators skip entirely.";
+
+const ogTitle = hasScenario ? `This household can afford up to ${formatUSD(results.rentAffordability.maxAffordableRent)}/mo in rent — TrueAfford` : undefined;
+const ogDescription = hasScenario ? "See the full breakdown of all three rent affordability rules and which one binds." : undefined;
+---
+
+<Layout title={title} description={description} ogTitle={ogTitle} ogDescription={ogDescription} locale={locale} translationSlug="rent-affordability-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Rent Affordability Calculator"
+    heading="What can you actually afford to rent?"
+    intro="Most rent calculators show you one number: 30% of your income. This one checks that, plus the landlord screening rule almost nobody explains, plus whether your budget actually survives the rent after renters insurance, utilities, and real expenses."
+    faqs={[
+      {
+        question: "Why are there three different numbers?",
+        answer:
+          "Because three independent things can stop you from getting or keeping an apartment at a given rent: the informal 30%-of-income guideline, a landlord's formal income verification, and whether your own budget actually survives the payment. The lowest of the three is your real ceiling.",
+      },
+      {
+        question: "What is the 40x rule, and why does it matter?",
+        answer:
+          "Many landlords require annual gross income to be at least 40 times the monthly rent before they'll approve an application. It turns out this is mathematically identical to the 30%-of-income rule — but landlords apply it strictly against verified gross income, with no room for the rounding or optimism people apply to their own mental math.",
+      },
+      {
+        question: "Why does renters insurance count here?",
+        answer:
+          "It's a real, usually-required monthly cost of renting that a simple 30%-of-income calculation ignores. This calculator includes it — along with utilities — in the leftover-income test, since that's the number that determines whether the rent actually fits your budget.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Home affordability calculator" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Rent vs. buy calculator" },
+      { href: localizedPath(locale, "budget-calculator"), label: "Budget calculator" },
+    ]}
+  >
+    <RentAffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

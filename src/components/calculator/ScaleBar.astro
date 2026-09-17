@@ -1,0 +1,131 @@
+---
+import { formatUSD } from "../../lib/format";
+import { computeScaleGeometry } from "../../lib/scaleGeometry";
+
+interface Props {
+  comfortableMax: number;
+  stretchMax: number;
+  riskyMax: number;
+  evaluatedPrice: number;
+}
+
+const { comfortableMax, stretchMax, riskyMax, evaluatedPrice } = Astro.props;
+
+const { comfortableWidthPct, stretchWidthPct, riskyWidthPct, unaffordableWidthPct, markerLeftPct } = computeScaleGeometry({
+  comfortableMax,
+  stretchMax,
+  riskyMax,
+  evaluatedPrice,
+});
+const comfortableWidth = comfortableWidthPct;
+const stretchWidth = stretchWidthPct;
+const riskyWidth = riskyWidthPct;
+const beyondWidth = unaffordableWidthPct;
+const markerLeft = markerLeftPct;
+---
+
+<div class="scale" role="img" aria-label={`Affordability scale: Comfortable up to ${formatUSD(comfortableMax)}, Stretch up to ${formatUSD(stretchMax)}, Risky up to ${formatUSD(riskyMax)}. Evaluated price ${formatUSD(evaluatedPrice)}.`}>
+  <div class="scale-track">
+    <div class="zone zone-comfortable" style={`width:${comfortableWidth}%`} id="scale-zone-comfortable"></div>
+    <div class="zone zone-stretch" style={`width:${stretchWidth}%`} id="scale-zone-stretch"></div>
+    <div class="zone zone-risky" style={`width:${riskyWidth}%`} id="scale-zone-risky"></div>
+    <div class="zone zone-unaffordable" style={`width:${beyondWidth}%`} id="scale-zone-unaffordable"></div>
+    <div class="marker" id="scale-marker" style={`left:${markerLeft}%`} aria-hidden="true"></div>
+  </div>
+  <div class="scale-labels">
+    <span class="scale-label label-comfortable">
+      Comfortable <strong id="scale-label-comfortable" data-bind="comfortableMax">{formatUSD(comfortableMax)}</strong>
+    </span>
+    <span class="scale-label label-stretch">
+      Stretch <strong id="scale-label-stretch" data-bind="stretchMax">{formatUSD(stretchMax)}</strong>
+    </span>
+    <span class="scale-label label-risky">
+      Risky <strong id="scale-label-risky" data-bind="riskyMax">{formatUSD(riskyMax)}</strong>
+    </span>
+  </div>
+</div>
+
+<style>
+  .scale {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .scale-track {
+    position: relative;
+    display: flex;
+    height: 16px;
+    width: 100%;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--color-hairline);
+  }
+
+  .zone {
+    height: 100%;
+  }
+
+  .zone-comfortable {
+    background: var(--color-comfortable);
+  }
+
+  .zone-stretch {
+    background: var(--color-stretch);
+  }
+
+  .zone-risky {
+    background: var(--color-risky);
+  }
+
+  .zone-unaffordable {
+    background: var(--color-hairline);
+  }
+
+  .marker {
+    position: absolute;
+    top: -4px;
+    width: 4px;
+    height: 24px;
+    background: var(--color-ink);
+    border-radius: var(--radius-full);
+    transform: translateX(-2px);
+    transition: left 0.15s ease;
+  }
+
+  .scale-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    font-size: var(--text-body-sm-size);
+    color: var(--color-body);
+  }
+
+  .scale-label strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .label-comfortable::before,
+  .label-stretch::before,
+  .label-risky::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    margin-right: var(--space-xxs);
+  }
+
+  .label-comfortable::before {
+    background: var(--color-comfortable);
+  }
+
+  .label-stretch::before {
+    background: var(--color-stretch);
+  }
+
+  .label-risky::before {
+    background: var(--color-risky);
+  }
+</style>

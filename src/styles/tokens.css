@@ -1,0 +1,173 @@
+/*
+  Design tokens adapted from DESIGN.md (Vercel Geist system analysis):
+  near-black ink on a near-white canvas, hairline borders instead of
+  shadows, restrained color used only for semantic signal. Geist Sans/Mono
+  are not freely distributable here, so per DESIGN.md's own documented
+  substitution: Inter (sans) and JetBrains Mono (mono) stand in, loaded
+  from Google Fonts.
+
+  Extended beyond the source analysis with a tier-signal triad
+  (comfortable/stretch/risky) — TrueAfford's three-tier affordability
+  scale needs a distinct green/amber/red channel that a dev-tool brand
+  page never had to express.
+*/
+
+:root {
+  /* Brand & ink */
+  --color-ink: #171717;
+  --color-on-ink: #ffffff;
+  --color-on-ink-muted: #b8b8b8;
+  --color-body: #4d4d4d;
+  --color-mute: #8f8f8f;
+  --color-faint: #a1a1a1;
+
+  /* Surface */
+  --color-canvas: #fafafa;
+  --color-canvas-elevated: #ffffff;
+  --color-hairline: #ebebeb;
+  --color-hairline-soft: #f2f2f2;
+
+  /* Accent */
+  --color-link: #0070f3;
+  --color-link-deep: #0761d1;
+  --color-link-soft: #d3e5ff;
+
+  /* Semantic: form/validation */
+  --color-error: #ee0000;
+  --color-error-deep: #c50000;
+  --color-error-soft: #fde3e3;
+  --color-warning: #f5a623;
+  --color-warning-soft: #fff3dc;
+  --color-warning-deep: #ab570a;
+
+  /* Semantic: affordability tiers — the product's core visual language */
+  --color-comfortable: #0a8f5b;
+  --color-comfortable-soft: #dff5eb;
+  --color-stretch: #b8790a;
+  --color-stretch-soft: #fbedd3;
+  --color-risky: #c8501f;
+  --color-risky-soft: #fbe3d6;
+  --color-unaffordable: #c50000;
+  --color-unaffordable-soft: #fde3e3;
+
+  /* Typography */
+  --font-sans: "Inter", "Geist", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-display-xl-size: 48px;
+  --text-display-xl-weight: 600;
+  --text-display-xl-leading: 48px;
+  --text-display-xl-tracking: -2.4px;
+
+  --text-heading-lg-size: 32px;
+  --text-heading-lg-weight: 600;
+  --text-heading-lg-leading: 40px;
+  --text-heading-lg-tracking: -1.28px;
+
+  --text-heading-md-size: 20px;
+  --text-heading-md-weight: 600;
+  --text-heading-md-leading: 28px;
+  --text-heading-md-tracking: -0.4px;
+
+  --text-label-sm-size: 14px;
+  --text-label-sm-weight: 500;
+  --text-label-sm-leading: 20px;
+  --text-label-sm-tracking: -0.28px;
+
+  --text-mono-eyebrow-size: 12px;
+  --text-mono-eyebrow-weight: 500;
+  --text-mono-eyebrow-leading: 16px;
+
+  --text-body-lg-size: 16px;
+  --text-body-lg-leading: 24px;
+
+  --text-body-md-size: 14px;
+  --text-body-md-leading: 20px;
+
+  --text-body-sm-size: 12px;
+  --text-body-sm-leading: 16px;
+
+  --text-button-lg-size: 16px;
+  --text-button-lg-weight: 500;
+  --text-button-lg-leading: 20px;
+
+  --text-button-md-size: 14px;
+  --text-button-md-weight: 500;
+  --text-button-md-leading: 20px;
+
+  /* Spacing */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 40px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+  --space-section: 128px;
+
+  /* Radius */
+  --radius-none: 0px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 100px;
+  --radius-full: 9999px;
+
+  /* Elevation */
+  --shadow-1: 0px 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 16px -4px rgba(0, 0, 0, 0.08);
+
+  --container-max: 1200px;
+
+  /* Navigation surfaces */
+  --color-nav-start: #fffefa;
+  --color-nav-middle: #fffdf6;
+  --color-nav-end: #fff8e8;
+  --color-nav-glow: rgba(255, 222, 112, 0.2);
+  --color-nav-panel: rgba(255, 253, 246, 0.8);
+  --color-nav-border: #f8edd6;
+  --shadow-nav: 0 8px 24px -14px rgba(104, 73, 18, 0.35);
+}
+
+/* An explicit data attribute makes the saved preference override the OS setting. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-ink: #f5f5f5;
+  --color-on-ink: #171717;
+  --color-on-ink-muted: #5e5e5e;
+  --color-body: #c4c4c4;
+  --color-mute: #9e9e9e;
+  --color-faint: #777777;
+  --color-canvas: #111111;
+  --color-canvas-elevated: #1b1b1b;
+  --color-hairline: #303030;
+  --color-hairline-soft: #252525;
+  --color-link: #62a8ff;
+  --color-link-deep: #9bc8ff;
+  --color-link-soft: #183c68;
+  --color-error: #ff7777;
+  --color-error-deep: #ff9d9d;
+  --color-error-soft: #4b2020;
+  --color-warning: #ffc05c;
+  --color-warning-soft: #49371a;
+  --color-warning-deep: #ffd18a;
+  --color-comfortable: #57d69e;
+  --color-comfortable-soft: #173d2d;
+  --color-stretch: #f2bd58;
+  --color-stretch-soft: #49381b;
+  --color-risky: #ff996c;
+  --color-risky-soft: #4b2b20;
+  --color-unaffordable: #ff8585;
+  --color-unaffordable-soft: #4b2020;
+  --shadow-1: 0px 1px 1px rgba(0, 0, 0, 0.28);
+  --shadow-2: 0px 2px 2px rgba(0, 0, 0, 0.28), 0px 8px 16px -4px rgba(0, 0, 0, 0.48);
+  --color-nav-start: #171717;
+  --color-nav-middle: #151515;
+  --color-nav-end: #211c12;
+  --color-nav-glow: rgba(214, 162, 51, 0.16);
+  --color-nav-panel: rgba(27, 27, 27, 0.86);
+  --color-nav-border: #3b3323;
+  --shadow-nav: 0 8px 24px -14px rgba(0, 0, 0, 0.72);
+}

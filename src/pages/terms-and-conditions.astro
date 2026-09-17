@@ -1,0 +1,72 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const title = "Terms & Conditions — TrueAfford";
+const description = "The terms for using TrueAfford's calculators: an informational tool, not financial or lending advice, provided as-is.";
+const contactEmail = "support@trueaffordapp.com";
+const lastUpdated = "September 16, 2026";
+---
+
+<Layout title={title} description={description}>
+  <section class="container doc-hero">
+    <p class="eyebrow">Terms & Conditions</p>
+    <h1>The short version: this is a calculator, not advice</h1>
+    <p class="intro">
+      By using TrueAfford, you agree to the terms below. If you don't agree with them, please don't use the site.
+    </p>
+    <p class="doc-updated">Last updated: {lastUpdated}</p>
+  </section>
+
+  <section class="container doc-section" id="what-this-is">
+    <h2>What this site is</h2>
+    <p>
+      TrueAfford is a free, informational calculator suite for home, mortgage, rent, and car affordability. Every result is produced by applying published formulas and publicly sourced data (documented in full on the
+      <a href="/methodology">methodology page</a>) to the numbers you enter. It is a starting point for your own thinking, not a quote, an approval, or a substitute for advice from a mortgage lender, financial advisor,
+      accountant, or attorney.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="no-advice">
+    <h2>Not financial, legal, or lending advice</h2>
+    <p>
+      Nothing on this site constitutes financial, legal, tax, or lending advice, and no calculator result is an offer or guarantee of credit or approval from any lender. Actual mortgage rates, loan terms, taxes,
+      insurance premiums, and eligibility depend on factors this site cannot see — your credit profile, a specific lender's underwriting standards, and market conditions at the time you apply. Always confirm real numbers
+      with a qualified professional before making a financial decision.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="accuracy">
+    <h2>Accuracy of results</h2>
+    <p>
+      We aim for every formula and data source to be accurate and current, and the methodology page states when each data source was last reviewed. Even so, calculations depend on defaults and published averages
+      (state-level property tax and insurance rates, standard interest-rate baselines, and similar) that may not reflect your specific situation. Results are provided for informational purposes only, and we make no
+      warranty — express or implied — as to their accuracy, completeness, or fitness for any particular purpose.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="no-accounts">
+    <h2>Use of the site</h2>
+    <p>
+      No account is required to use any calculator on this site. You agree to use the site only for its intended purpose and not to attempt to disrupt, overload, or interfere with its operation, or to misuse it in any
+      way that violates applicable law.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="liability">
+    <h2>Limitation of liability</h2>
+    <p>
+      TrueAfford is provided "as is," without warranty of any kind. To the fullest extent permitted by law, we are not liable for any loss or damage arising from your use of this site or reliance on any calculator
+      result, including decisions made about buying, renting, financing, or budgeting.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="changes">
+    <h2>Changes to these terms</h2>
+    <p>We may update these terms as the site changes. The date at the top of this page reflects the most recent revision. Continued use of the site after a change means you accept the updated terms.</p>
+  </section>
+
+  <section class="container doc-section" id="contact">
+    <h2>Contact</h2>
+    <p>Questions about these terms: <a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
+  </section>
+</Layout>

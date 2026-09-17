@@ -1,0 +1,174 @@
+@import "./tokens.css";
+@import "./calculator-shared.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding-bottom: 44px;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body-md-size);
+  line-height: var(--text-body-md-leading);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: var(--color-link);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-lg);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-eyebrow-size);
+  font-weight: var(--text-mono-eyebrow-weight);
+  line-height: var(--text-mono-eyebrow-leading);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-mute);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-md);
+  top: -48px;
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  z-index: 100;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: var(--space-md);
+}
+
+.doc-hero {
+  padding-block: var(--space-3xl) var(--space-xl);
+  max-width: 760px;
+}
+
+.doc-hero h1 {
+  font-size: var(--text-heading-lg-size);
+  font-weight: var(--text-heading-lg-weight);
+  letter-spacing: var(--text-heading-lg-tracking);
+  margin-block: var(--space-sm) var(--space-md);
+}
+
+.doc-hero .intro {
+  font-size: var(--text-body-lg-size);
+  line-height: var(--text-body-lg-leading);
+  color: var(--color-body);
+}
+
+.doc-updated {
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm-size);
+  color: var(--color-mute);
+  margin-top: var(--space-sm);
+}
+
+.doc-section {
+  max-width: 760px;
+  padding-bottom: var(--space-2xl);
+}
+
+.doc-section:last-of-type {
+  padding-bottom: var(--space-4xl);
+}
+
+.doc-section h2 {
+  font-size: var(--text-heading-md-size);
+  font-weight: var(--text-heading-md-weight);
+  margin-bottom: var(--space-sm);
+  scroll-margin-top: var(--space-lg);
+}
+
+.doc-section p {
+  color: var(--color-body);
+  line-height: var(--text-body-lg-leading);
+  margin-bottom: var(--space-sm);
+}
+
+.doc-section ul,
+.doc-section ol {
+  color: var(--color-body);
+  line-height: var(--text-body-lg-leading);
+  margin: 0 0 var(--space-sm);
+  padding-left: var(--space-lg);
+}
+
+.doc-section li {
+  margin-bottom: var(--space-xxs);
+}
+
+.doc-section a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.doc-section a:hover {
+  text-decoration: underline;
+}

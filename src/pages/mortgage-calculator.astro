@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import CalculatorPageShell from "../components/calculator/CalculatorPageShell.astro";
+import AffordabilityCalculator from "../components/calculator/AffordabilityCalculator.astro";
+import { decodeScenario } from "../lib/state/serialize";
+import { computeResults } from "../lib/state/computeResults";
+import { scenarioOgCopy } from "../lib/seo";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const scenario = decodeScenario(Astro.url.searchParams);
+const results = computeResults(scenario);
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+
+const title = "Mortgage Affordability Calculator — Full Monthly Payment, State Tax & Insurance | TrueAfford";
+const description =
+  "A mortgage affordability calculator and home loan affordability calculator in one, with no lender ads in the results. Full monthly breakdown — principal, interest, state property tax, insurance, PMI, HOA, and maintenance — plus what you can actually afford, not just what a lender approves.";
+---
+
+<Layout title={title} description={description} ogTitle={ogCopy?.title} ogDescription={ogCopy?.description} locale={locale} translationSlug="mortgage-calculator">
+  <CalculatorPageShell
+    locale={locale}
+    eyebrow="Mortgage Calculator"
+    heading="A mortgage calculator with nothing to sell you"
+    intro="Every other mortgage calculator online is owned by a company that makes money when you apply for a loan. This one isn't selling leads, so there's no incentive to show you a bigger number than you can actually afford."
+    faqs={[
+      {
+        question: "How is this different from a bank's mortgage calculator?",
+        answer:
+          "A bank's calculator shows what you'd qualify for. This one shows that number too, but sits it next to what your household can actually sustain once real monthly expenses are accounted for — the two are often different, and the gap matters.",
+      },
+      {
+        question: "Does the payment include taxes and insurance?",
+        answer:
+          "Yes — principal, interest, property tax (state-specific, not a national average), homeowner's insurance, PMI when your down payment is under 20%, HOA dues if you have them, and a maintenance reserve. Every line is broken out separately and editable.",
+      },
+      {
+        question: "Can I share my results with someone?",
+        answer:
+          "Yes — every input you change updates the page's URL automatically. Copy the link at the bottom of the results and send it to anyone; it opens to the exact same numbers, computed fresh, not a screenshot.",
+      },
+      {
+        question: "What credit score assumptions does this use?",
+        answer:
+          "Pick your credit band and the calculator applies a realistic default interest rate and PMI cost for that tier, both documented on the methodology page. You can override the interest rate directly if you have a specific quote.",
+      },
+      {
+        question: "Is a mortgage affordability calculator the same as a home loan affordability calculator?",
+        answer:
+          "Yes — 'mortgage affordability calculator' and 'home loan affordability calculator' describe the same thing: working out the monthly payment and the price a home loan supports. This one adds the state-specific tax and insurance data, and the lender-approval-vs-sustainable comparison, that most versions of this tool leave out.",
+      },
+    ]}
+    crossLinks={[
+      { href: localizedPath(locale, "home-affordability-calculator"), label: "Home affordability calculator" },
+      { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Rent vs. buy calculator" },
+      { href: localizedPath(locale, "methodology"), label: "Methodology" },
+    ]}
+  >
+    <AffordabilityCalculator />
+  </CalculatorPageShell>
+</Layout>

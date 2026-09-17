@@ -1,0 +1,274 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { DEFAULT_SCENARIO } from "../../lib/state/schema";
+import { scenarioToQueryString } from "../../lib/state/serialize";
+import { computeResults } from "../../lib/state/computeResults";
+import { PROPERTY_TAX_BY_STATE, getPropertyTaxRate } from "../../lib/data/property-tax-by-state";
+import { INSURANCE_BY_STATE, getInsuranceRate } from "../../lib/data/homeowners-insurance-by-state";
+import { formatUSD, formatPct } from "../../lib/format";
+import type { ScenarioState } from "../../lib/state/schema";
+
+export function getStaticPaths() {
+  return Object.values(PROPERTY_TAX_BY_STATE)
+    .sort((a, b) => a.state.localeCompare(b.state))
+    .map((entry) => ({ params: { state: entry.stateCode.toLowerCase() } }));
+}
+
+const { state: stateParam } = Astro.params;
+const stateCode = stateParam.toUpperCase();
+
+const scenario: ScenarioState = { ...DEFAULT_SCENARIO, stateCode };
+const results = computeResults(scenario);
+
+const taxEntry = getPropertyTaxRate(stateCode);
+const insuranceEntry = getInsuranceRate(stateCode);
+const calculatorHref = `/mortgage-calculator${scenarioToQueryString(scenario)}`;
+
+const statesByTaxRateAsc = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.effectiveRatePct - b.effectiveRatePct);
+const taxRank = statesByTaxRateAsc.findIndex((e) => e.stateCode === stateCode) + 1;
+const totalStates = statesByTaxRateAsc.length;
+const taxRankLabel = taxRank <= totalStates / 2 ? `${taxRank}${ordinalSuffix(taxRank)} lowest` : `${totalStates - taxRank + 1}${ordinalSuffix(totalStates - taxRank + 1)} highest`;
+
+const statesByInsuranceAsc = Object.values(INSURANCE_BY_STATE).sort((a, b) => a.annualPremiumAt300k - b.annualPremiumAt300k);
+const insuranceRank = statesByInsuranceAsc.findIndex((e) => e.stateCode === stateCode) + 1;
+const insuranceRankLabel = insuranceRank <= totalStates / 2 ? `${insuranceRank}${ordinalSuffix(insuranceRank)} lowest` : `${totalStates - insuranceRank + 1}${ordinalSuffix(totalStates - insuranceRank + 1)} highest`;
+
+function ordinalSuffix(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return "th";
+  switch (n % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
+const stateSlugList = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.state.localeCompare(b.state));
+const currentIndex = stateSlugList.findIndex((e) => e.stateCode === stateCode);
+const prevState = currentIndex > 0 ? stateSlugList[currentIndex - 1] : null;
+const nextState = currentIndex < stateSlugList.length - 1 ? stateSlugList[currentIndex + 1] : null;
+
+const title = `Home Affordability in ${taxEntry.state} — What a Typical Household Can Afford | TrueAfford`;
+const description = results.isUnaffordable
+  ? `A baseline household scenario in ${taxEntry.state} doesn't clear affordability thresholds yet at this default income. See ${taxEntry.state}'s actual property tax and insurance rates and what would need to change.`
+  : `A baseline household in ${taxEntry.state} could comfortably afford up to ${formatUSD(results.comfortableMax)}, using ${taxEntry.state}'s actual effective property tax rate and average insurance premium — not a national average.`;
+
+const gap = results.riskyMax - results.sustainableMax;
+---
+
+<Layout title={title} description={description}>
+  <section class="container hero">
+    <p class="eyebrow">Home Affordability by State</p>
+    <h1>What can you afford in {taxEntry.state}?</h1>
+    <p class="intro">
+      A baseline estimate for a household earning {formatUSD(scenario.grossAnnualIncome)} a year gross, with typical debts and expenses, a {formatUSD(scenario.downPaymentDollars)} down payment, and a {scenario.creditBand} credit
+      score — using {taxEntry.state}'s own property tax and insurance data rather than a national average. Every assumption is editable in the full calculator below.
+    </p>
+  </section>
+
+  <section class="container section">
+    <p class="state-fact">
+      {taxEntry.state}'s effective property tax rate is around <strong>{formatPct(taxEntry.effectiveRatePct, 2)}</strong> of home value per year — the <strong>{taxRankLabel}</strong> in the country. Average homeowner's
+      insurance runs near <strong>{formatUSD(insuranceEntry.annualPremiumAt300k)}/year</strong> on a $300,000 home — the <strong>{insuranceRankLabel}</strong>
+      {insuranceEntry.highCost && " and a state where premiums have been rising quickly due to weather- and insurer-availability pressure"}.
+    </p>
+
+    {
+      results.isUnaffordable ? (
+        <div class="callout callout-unaffordable">
+          <p class="callout-title">Not affordable at this baseline yet</p>
+          <ul>
+            {results.unaffordableReasons.map((reason) => (
+              <li>{reason}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div class="tier-grid">
+          <div class="tier-card" data-tier="comfortable">
+            <p class="tier-label">Comfortable</p>
+            <p class="tier-value">{formatUSD(results.comfortableMax)}</p>
+          </div>
+          <div class="tier-card" data-tier="stretch">
+            <p class="tier-label">Stretch</p>
+            <p class="tier-value">{formatUSD(results.stretchMax)}</p>
+          </div>
+          <div class="tier-card" data-tier="risky">
+            <p class="tier-label">Risky ceiling</p>
+            <p class="tier-value">{formatUSD(results.riskyMax)}</p>
+          </div>
+        </div>
+      )
+    }
+
+    <p class="narrative">
+      {results.isUnaffordable
+        ? `Even the Risky ceiling doesn't clear at this baseline income in ${taxEntry.state} — the calculator below shows exactly what's driving that and lets you adjust income, debts, or down payment to see what would change it.`
+        : gap > 500
+          ? `A lender would likely approve up to ${formatUSD(results.riskyMax)} on this baseline in ${taxEntry.state} — but this household's own budget, once real expenses are counted, can only sustain ${formatUSD(results.sustainableMax)}. That ${formatUSD(gap)} gap is exactly the kind of overreach this calculator exists to flag before it becomes a monthly deficit.`
+          : `This baseline's own budget can sustain at least as much as a lender's debt-to-income ceiling allows in ${taxEntry.state} — the DTI ratio, not the household budget, is what limits the number here.`}
+    </p>
+
+    <a class="btn-primary" href={calculatorHref}>Open the full calculator with these numbers</a>
+  </section>
+
+  <section class="container section nav-section">
+    <p class="section-heading">Other states</p>
+    <p class="state-nav">
+      {prevState !== null && <a href={`/state/${prevState.stateCode.toLowerCase()}`}>← {prevState.state}</a>}
+      {nextState !== null && <a href={`/state/${nextState.stateCode.toLowerCase()}`}>{nextState.state} →</a>}
+    </p>
+    <p class="cross-links">
+      <a href="/state">Browse all states</a> · <a href="/salary">Browse by income</a> · <a href="/mortgage-calculator">Full mortgage calculator</a> · <a href="/methodology#property-tax">Methodology</a>
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 760px;
+  }
+
+  .hero h1 {
+    font-size: var(--text-heading-lg-size);
+    font-weight: var(--text-heading-lg-weight);
+    letter-spacing: var(--text-heading-lg-tracking);
+    margin-block: var(--space-sm) var(--space-md);
+  }
+
+  .hero .intro {
+    font-size: var(--text-body-lg-size);
+    line-height: var(--text-body-lg-leading);
+    color: var(--color-body);
+  }
+
+  .section {
+    max-width: 760px;
+    padding-bottom: var(--space-2xl);
+  }
+
+  .section-heading {
+    font-weight: 600;
+    font-size: var(--text-label-sm-size);
+    margin-bottom: var(--space-xs);
+  }
+
+  .state-fact {
+    color: var(--color-body);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-lg);
+    font-size: var(--text-body-sm-size);
+    font-family: var(--font-mono);
+  }
+
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  @media (max-width: 640px) {
+    .tier-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tier-card {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+
+  .tier-card[data-tier="comfortable"] {
+    background: var(--color-comfortable-soft);
+  }
+  .tier-card[data-tier="stretch"] {
+    background: var(--color-stretch-soft);
+  }
+  .tier-card[data-tier="risky"] {
+    background: var(--color-risky-soft);
+  }
+
+  .tier-label {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+    margin-bottom: var(--space-xxs);
+  }
+
+  .tier-value {
+    font-size: var(--text-heading-md-size);
+    font-weight: 600;
+  }
+
+  .narrative {
+    color: var(--color-body);
+    line-height: var(--text-body-lg-leading);
+    margin-bottom: var(--space-lg);
+  }
+
+  .callout {
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--color-unaffordable-soft);
+    margin-bottom: var(--space-lg);
+  }
+
+  .callout-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
+
+  .callout ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-button-lg-size);
+    font-weight: var(--text-button-lg-weight);
+    text-decoration: none;
+  }
+
+  .nav-section {
+    border-top: 1px solid var(--color-hairline);
+    padding-top: var(--space-lg);
+  }
+
+  .state-nav {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-body-sm-size);
+    margin-bottom: var(--space-md);
+  }
+
+  .state-nav a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .cross-links {
+    font-size: var(--text-body-sm-size);
+    color: var(--color-mute);
+  }
+
+  .cross-links a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+</style>

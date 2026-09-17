@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { localizedPath } from "../i18n/locales";
+
+const locale = "en" as const;
+
+const title = "About Us — TrueAfford";
+const description = "Why TrueAfford exists: an affordability calculator suite with no lender ads, no lead forms, and every formula documented in the open.";
+---
+
+<Layout title={title} description={description} locale={locale} translationSlug="about-us">
+  <section class="container doc-hero">
+    <p class="eyebrow">About Us</p>
+    <h1>An affordability calculator that isn't selling anything</h1>
+    <p class="intro">
+      TrueAfford was built on a simple observation: almost every home, mortgage, rent, and car affordability calculator online is owned by a company that profits when the number it shows you is bigger — a lender, a
+      real-estate portal, or a lead-gen business. This site has no leads to sell, so it has no reason to inflate the answer.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="mission">
+    <h2>What we're trying to do</h2>
+    <p>
+      Give you a straight answer to "what can I actually afford" — using your real income, your real debts, and real expenses like childcare, healthcare, and groceries that most calculators leave out entirely. Every result
+      shows both what a lender would likely approve and what your household can actually sustain month after month, because those two numbers are often different, and the gap between them matters more than either number
+      alone.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="how">
+    <h2>How this is different</h2>
+    <ul>
+      <li>No ads, no lender placements, and no "recommended offers" next to your result.</li>
+      <li>No account, no email gate, and no lead form standing between you and a number.</li>
+      <li>State-level property tax and insurance data instead of a single national average.</li>
+      <li>A maintenance reserve included by default — a real cost of ownership most calculators quietly skip.</li>
+      <li>Every formula, assumption, and data source published on the <a href={localizedPath(locale, "methodology")}>methodology page</a>, dated and sourced, so it can be checked rather than trusted blindly.</li>
+    </ul>
+    <p>All of the calculations run in your browser. Nothing you type into a calculator is sent to or stored on our servers — see the <a href="/privacy-policy">privacy policy</a> for the details.</p>
+  </section>
+
+  <section class="container doc-section" id="who">
+    <h2>Who built this</h2>
+    <p>
+      {/* TODO: replace with your real name, a short bio, and why you built TrueAfford — a named, accountable author matters most on a financial-advice site like this one. */}
+      TrueAfford is built and maintained by <strong>Nhment Tech (created by Faizan Kamal)</strong>, I’m a software engineer with experience building practical web tools and SaaS products. I built this because housing affordability involves a lot of confusing numbers, and I wanted to make the math simple and easy for people to understand. If you have questions about the methodology or want to report an error, see <a href={localizedPath(locale, "contact-us")}>contact us</a> below.
+    </p>
+  </section>
+
+  <section class="container doc-section" id="contact">
+    <h2>Questions or corrections</h2>
+    <p>
+      If a number looks wrong, a data source is out of date, or something on the site is broken, we'd genuinely like to know — <a href={localizedPath(locale, "contact-us")}>get in touch</a>.
+    </p>
+  </section>
+</Layout>
