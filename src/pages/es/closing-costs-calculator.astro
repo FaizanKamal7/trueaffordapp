@@ -52,6 +52,6 @@ const ogTitle = hasScenario ? `Costos de cierre típicos: ${formatUSD(closingCos
       { href: localizedPath(locale, "amortization-schedule-calculator"), label: "Calculadora de tabla de amortización" },
     ]}
   >
-    <ClosingCostsCalculator />
+    <ClosingCostsCalculator locale={locale} />
   </CalculatorPageShell>
 </Layout>

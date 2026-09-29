@@ -51,6 +51,6 @@ const ogTitle = hasScenario ? `Necesidades en ${formatPct(results.budget.needsPc
       { href: localizedPath(locale, "rent-vs-buy-calculator"), label: "Calculadora de alquilar vs. comprar" },
     ]}
   >
-    <BudgetCalculator />
+    <BudgetCalculator locale={locale} />
   </CalculatorPageShell>
 </Layout>

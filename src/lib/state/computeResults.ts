@@ -4,6 +4,7 @@ import { classifyAffordability } from "../engine/tiers";
 import { explainConstraints } from "../engine/constraints";
 import type { ConstraintExplanation } from "../engine/constraints";
 import { explainUnaffordable } from "../engine/explain";
+import type { UnaffordableReasonDetail } from "../engine/explain";
 import { computeSensitivity } from "../engine/sensitivity";
 import type { SensitivityResult } from "../engine/sensitivity";
 import type { AffordabilityResult, AffordabilityTier } from "../engine/types";
@@ -22,6 +23,7 @@ export interface CalculatorResults {
   constraints: ConstraintExplanation[];
   isUnaffordable: boolean;
   unaffordableReasons: string[];
+  unaffordableReasonDetails: UnaffordableReasonDetail[];
   sensitivity: SensitivityResult;
 }
 
@@ -50,7 +52,7 @@ export function computeResults(scenario: ScenarioState): CalculatorResults {
   const affordability = classifyAffordability(household, loan, evaluatedPrice);
   const constraints = explainConstraints(household, loan, bestNonZeroTier);
   const isUnaffordable = evaluatedPrice <= 0 || affordability.tier === "unaffordable";
-  const unaffordableReasons = isUnaffordable ? explainUnaffordable(household, loan, evaluatedPrice).reasons : [];
+  const { reasons: unaffordableReasons, details: unaffordableReasonDetails } = isUnaffordable ? explainUnaffordable(household, loan, evaluatedPrice) : { reasons: [], details: [] };
   const sensitivity = computeSensitivity(household, loan, evaluatedPrice, bestNonZeroTier);
 
   return {
@@ -65,6 +67,7 @@ export function computeResults(scenario: ScenarioState): CalculatorResults {
     constraints,
     isUnaffordable,
     unaffordableReasons,
+    unaffordableReasonDetails,
     sensitivity,
   };
 }

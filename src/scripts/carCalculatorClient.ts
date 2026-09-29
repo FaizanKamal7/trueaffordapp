@@ -5,15 +5,9 @@ import type { CarCalculatorResults } from "../lib/state/computeCarResults";
 import { computeScaleGeometry } from "../lib/scaleGeometry";
 import { formatUSD, formatSignedUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
-
-const tierLabels: Record<string, string> = {
-  comfortable: "Comfortable",
-  stretch: "Stretch",
-  risky: "Risky",
-  unaffordable: "Unaffordable",
-};
 
 function setBoundText(bindKey: string, text: string): void {
   document.querySelectorAll(`[data-bind="${bindKey}"]`).forEach((n) => {
@@ -21,7 +15,9 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
-function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults): void {
+function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults, t: CalculatorCopy): void {
+  const tierLabels = t.tiers;
+  const tc = t.car;
   const { affordability } = results;
   const { breakdown } = affordability;
 
@@ -29,7 +25,7 @@ function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults
   const headline = el("car-headline");
   if (headline) {
     if (results.isUnaffordable) {
-      headline.textContent = "Not affordable at this price yet";
+      headline.textContent = t.common.notAffordableYet;
     } else {
       headline.innerHTML = "";
       const badge = document.createElement("span");
@@ -37,7 +33,7 @@ function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults
       badge.id = "car-tier-badge";
       badge.dataset.tier = affordability.tier;
       badge.textContent = tierLabels[affordability.tier];
-      headline.append(badge, document.createTextNode(" — up to "));
+      headline.append(badge, document.createTextNode(t.common.upTo));
       const strong = document.createElement("strong");
       strong.id = "car-evaluated-price";
       strong.dataset.bind = "evaluatedPrice";
@@ -80,15 +76,12 @@ function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults
   setBoundText("sustainableMax", formatUSD(results.sustainableMax));
   const gapEl = el("car-gap-explanation");
   if (gapEl) {
-    gapEl.textContent =
-      results.ruleVsSustainableGap > 500
-        ? `That's a ${formatUSD(results.ruleVsSustainableGap)} gap — the rule of thumb allows more car than your household's real budget can comfortably carry.`
-        : "Your budget can support at least as much as the 20/4/10 rule's ceiling — the rule of thumb isn't what's holding you back here.";
+    gapEl.textContent = results.ruleVsSustainableGap > 500 ? tc.gap(results.ruleVsSustainableGap) : tc.noGap;
   }
 
   // Breakdown
   const sectionHeading = document.querySelector(".breakdown .section-heading");
-  if (sectionHeading) sectionHeading.textContent = `Cost breakdown at ${formatUSD(results.evaluatedPrice)}`;
+  if (sectionHeading) sectionHeading.textContent = tc.costBreakdownAt(results.evaluatedPrice);
   setBoundText("carTax", formatUSD(breakdown.salesTax));
   setBoundText("carFinanced", formatUSD(breakdown.amountFinanced));
   setBoundText("carPi", formatUSD(breakdown.principalAndInterest));
@@ -104,9 +97,7 @@ function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults
   setBoundText("carLeftoverAmount", formatSignedUSD(affordability.leftoverIncome));
   const leftoverMessage = el("car-leftover-message");
   if (leftoverMessage) {
-    leftoverMessage.textContent = affordability.householdCanSustain
-      ? "This household clears both the 20/4/10-style ratio and a real monthly budget."
-      : "This household would run a monthly deficit at this price — even though it may look affordable by the ratio alone.";
+    leftoverMessage.textContent = affordability.householdCanSustain ? tc.canSustain : tc.cannotSustain;
   }
 
   // Share link
@@ -121,11 +112,12 @@ export function initCarCalculator(): void {
   const form = document.getElementById("car-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-car-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeCarResults(scenario);
-    renderCarResults(scenario, results);
+    renderCarResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 

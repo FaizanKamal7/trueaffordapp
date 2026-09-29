@@ -50,6 +50,6 @@ const ogTitle = hasScenario && scenario.extraMonthlyPayment > 0 ? `Los pagos ext
       { href: localizedPath(locale, "methodology"), label: "Metodología" },
     ]}
   >
-    <AmortizationCalculator />
+    <AmortizationCalculator locale={locale} />
   </CalculatorPageShell>
 </Layout>

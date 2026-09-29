@@ -23,6 +23,10 @@ export interface ConstraintExplanation {
   /** Dollars this factor is subtracting from the household's max sustainable home price, when computable */
   priceImpact: number | null;
   description: string;
+  /** Extra figures quoted in `description`, so the UI can phrase it in other locales. */
+  stateName?: string;
+  taxRatePct?: number;
+  additionalDownPayment?: number;
 }
 
 function formatUSD(amount: number): string {
@@ -73,6 +77,8 @@ export function explainConstraints(
       monthlyImpact: taxMonthlyImpact,
       priceImpact: null,
       description: `${taxEntry.state} property tax at ${(taxEntry.effectiveRatePct * 100).toFixed(2)}% is costing you roughly ${formatUSD(taxMonthlyImpact)}/mo more than the national average would suggest.`,
+      stateName: taxEntry.state,
+      taxRatePct: taxEntry.effectiveRatePct * 100,
     });
   }
 
@@ -86,6 +92,7 @@ export function explainConstraints(
       monthlyImpact: insuranceMonthlyImpact,
       priceImpact: null,
       description: `Homeowner's insurance in ${insuranceEntry.state} is costing you roughly ${formatUSD(insuranceMonthlyImpact)}/mo more than the national average would suggest.`,
+      stateName: insuranceEntry.state,
     });
   }
 
@@ -97,6 +104,7 @@ export function explainConstraints(
       monthlyImpact: breakdown.pmi,
       priceImpact: null,
       description: `Private mortgage insurance is costing you ${formatUSD(breakdown.pmi)}/mo because your down payment is under 20%. An additional ${formatUSD(downPaymentNeededFor20Pct)} down would eliminate it.`,
+      additionalDownPayment: downPaymentNeededFor20Pct,
     });
   }
 

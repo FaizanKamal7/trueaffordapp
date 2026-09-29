@@ -7,6 +7,16 @@ import { CREDIT_BANDS } from "../../lib/data/pmi-rates";
 import { formatUSD, formatSignedUSD } from "../../lib/format";
 import ScaleBar from "./ScaleBar.astro";
 
+import { DEFAULT_LOCALE, localizedPath, type LocaleCode } from "../../i18n/locales";
+import { CALCULATOR_COPY } from "../../i18n/calculators";
+
+interface Props {
+  locale?: LocaleCode;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const t = CALCULATOR_COPY[locale];
+
 const scenario = decodeScenario(Astro.url.searchParams);
 const results = computeCarResults(scenario);
 const { affordability } = results;
@@ -18,64 +28,60 @@ const termOptions = [36, 48, 60, 72] as const;
 
 const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), Astro.site ?? Astro.url.origin).toString();
 
-const tierLabels: Record<string, string> = {
-  comfortable: "Comfortable",
-  stretch: "Stretch",
-  risky: "Risky",
-  unaffordable: "Unaffordable",
-};
+const tierLabels = t.tiers;
+const tc = t.car;
 
 const ruleVsSustainableGap = results.ruleVsSustainableGap;
 ---
 
-<div class="calculator-grid" data-car-calculator>
+<div class="calculator-grid" data-car-calculator data-locale={locale}>
   <form id="car-form" class="calculator-form-col" method="get">
     <fieldset class="field-group">
-      <legend>Income &amp; debts</legend>
+      <legend>{t.common.incomeAndDebts}</legend>
       <label class="field">
-        <span>Annual household income (gross)</span>
+        <span>{t.common.grossIncome}</span>
         <input type="number" inputmode="numeric" name="gi" id="field-gi" min="0" step="1000" value={scenario.grossAnnualIncome} />
       </label>
       <label class="field">
-        <span>Monthly take-home pay (net)</span>
+        <span>{t.common.netIncome}</span>
         <input type="number" inputmode="numeric" name="ni" id="field-ni" min="0" step="50" value={scenario.netMonthlyIncome} />
       </label>
       <label class="field">
-        <span>Other monthly debt payments</span>
+        <span>{t.common.otherDebts}</span>
         <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
       </label>
     </fieldset>
 
     <fieldset class="field-group">
-      <legend>Real-life monthly expenses</legend>
-      <p class="field-group-note">Lenders don't count these against you — but they determine whether the car payment actually fits.</p>
+      <legend>{t.common.realLifeExpenses}</legend>
+      <p class="field-group-note">{tc.expensesNote}</p>
       <label class="field">
-        <span>Childcare</span>
+        <span>{t.common.childcare}</span>
         <input type="number" inputmode="numeric" name="ec" id="field-ec" min="0" step="25" value={scenario.childcare} />
       </label>
       <label class="field">
-        <span>Healthcare</span>
+        <span>{t.common.healthcare}</span>
         <input type="number" inputmode="numeric" name="eh" id="field-eh" min="0" step="25" value={scenario.healthcare} />
       </label>
       <label class="field">
-        <span>Groceries</span>
+        <span>{t.common.groceries}</span>
         <input type="number" inputmode="numeric" name="eg" id="field-eg" min="0" step="25" value={scenario.groceries} />
       </label>
       <label class="field">
-        <span>Transport</span>
+        <span>{t.common.transport}</span>
         <input type="number" inputmode="numeric" name="et" id="field-et" min="0" step="25" value={scenario.transport} />
       </label>
       <label class="field">
-        <span>Other</span>
+        <span>{t.common.other}</span>
         <input type="number" inputmode="numeric" name="eo" id="field-eo" min="0" step="25" value={scenario.otherExpenses} />
       </label>
     </fieldset>
 
     <fieldset class="field-group">
-      <legend>Car &amp; loan assumptions</legend>
+      <legend>{tc.carLoanAssumptions}</legend>
 
       <label class="field">
-        <span>State (for sales tax)</span>
+        <span>{tc.stateForTax}</span>
         <select name="st" id="field-st">
           {
             stateList.map((entry) => (
@@ -88,17 +94,17 @@ const ruleVsSustainableGap = results.ruleVsSustainableGap;
       </label>
 
       <label class="field">
-        <span>Down payment</span>
+        <span>{t.common.downPayment}</span>
         <input type="number" inputmode="numeric" name="cdp" id="field-cdp" min="0" step="500" value={scenario.carDownPaymentDollars} />
       </label>
 
       <label class="field">
-        <span>Trade-in value</span>
+        <span>{tc.tradeIn}</span>
         <input type="number" inputmode="numeric" name="cti" id="field-cti" min="0" step="500" value={scenario.carTradeInValueDollars} />
       </label>
 
       <label class="field">
-        <span>Credit score band</span>
+        <span>{t.common.creditBand}</span>
         <select name="ccb" id="field-ccb">
           {
             CREDIT_BANDS.map((band) => (
@@ -111,7 +117,7 @@ const ruleVsSustainableGap = results.ruleVsSustainableGap;
       </label>
 
       <label class="field">
-        <span>Interest rate override (%) <a class="info-link" href="/methodology/" aria-label="Why this matters">?</a></span>
+        <span>{t.common.rateOverride} <a class="info-link" href={localizedPath(locale, "methodology")} aria-label={t.common.whyThisMatters}>?</a></span>
         <input
           type="number"
           inputmode="decimal"
@@ -126,53 +132,53 @@ const ruleVsSustainableGap = results.ruleVsSustainableGap;
       </label>
 
       <fieldset class="field-inline">
-        <legend>Loan term</legend>
+        <legend>{t.common.loanTerm}</legend>
         {
           termOptions.map((months) => (
             <label>
-              <input type="radio" name="ctm" value={months} checked={scenario.carTermMonths === months} /> {months}mo
+              <input type="radio" name="ctm" value={months} checked={scenario.carTermMonths === months} /> {tc.termMonths(months)}
             </label>
           ))
         }
       </fieldset>
 
       <label class="field">
-        <span>Auto insurance (monthly)</span>
+        <span>{tc.autoInsurance}</span>
         <input type="number" inputmode="numeric" name="cin" id="field-cin" min="0" step="10" value={scenario.carInsuranceMonthly} />
       </label>
     </fieldset>
 
-    <p class="rate-disclosure">Default auto loan rates shown are static baselines as of {AUTO_RATE_AS_OF}, not a live feed — override with your own quote for an exact number.</p>
+    <p class="rate-disclosure">{tc.rateDisclosure(AUTO_RATE_AS_OF)}</p>
 
     <noscript>
-      <button type="submit" class="btn-primary">Calculate</button>
+      <button type="submit" class="btn-primary">{t.common.calculate}</button>
     </noscript>
   </form>
 
   <div class="results-col" id="car-results" aria-live="polite">
     <div>
-      <p class="eyebrow">Your result</p>
+      <p class="eyebrow">{t.common.yourResult}</p>
       {
         results.isUnaffordable ? (
           <h2 id="car-headline" data-bind="headline">
-            Not affordable at this price yet
+            {t.common.notAffordableYet}
           </h2>
         ) : (
           <h2 id="car-headline" data-bind="headline">
             <span class="tier-badge" data-tier={affordability.tier} id="car-tier-badge">
               {tierLabels[affordability.tier]}
             </span>{" "}
-            — up to <strong id="car-evaluated-price" data-bind="evaluatedPrice">{formatUSD(results.evaluatedPrice)}</strong>
+            {t.common.upTo.trimStart()}<strong id="car-evaluated-price" data-bind="evaluatedPrice">{formatUSD(results.evaluatedPrice)}</strong>
           </h2>
         )
       }
     </div>
 
-    <ScaleBar comfortableMax={results.comfortableMax} stretchMax={results.stretchMax} riskyMax={results.riskyMax} evaluatedPrice={results.evaluatedPrice} />
+    <ScaleBar locale={locale} comfortableMax={results.comfortableMax} stretchMax={results.stretchMax} riskyMax={results.riskyMax} evaluatedPrice={results.evaluatedPrice} />
 
     <div class="evaluate-row">
       <label class="field">
-        <span>Test a specific car price</span>
+        <span>{tc.testPrice}</span>
         <input
           type="number"
           inputmode="numeric"
@@ -186,70 +192,70 @@ const ruleVsSustainableGap = results.ruleVsSustainableGap;
         />
       </label>
       <button type="button" id="reset-evaluated-car-price" class="btn-ghost-sm" hidden={!results.isCustomEvaluatedPrice}>
-        Reset to recommended
+        {t.common.resetToRecommended}
       </button>
     </div>
 
     <div class="two-col-stats">
       <div class="stat-block">
-        <p class="stat-label">The 20/4/10 rule would allow up to</p>
+        <p class="stat-label">{tc.ruleAllows}</p>
         <p class="stat-value" id="car-rule-max" data-bind="ruleMax">{formatUSD(results.riskyMax)}</p>
       </div>
       <div class="stat-block">
-        <p class="stat-label">You can actually sustain up to</p>
+        <p class="stat-label">{t.common.sustainUpTo}</p>
         <p class="stat-value" id="car-sustainable-max" data-bind="sustainableMax">{formatUSD(results.sustainableMax)}</p>
       </div>
     </div>
     <p class="gap-explanation" id="car-gap-explanation">
       {ruleVsSustainableGap > 500
-        ? `That's a ${formatUSD(ruleVsSustainableGap)} gap — the rule of thumb allows more car than your household's real budget can comfortably carry.`
-        : "Your budget can support at least as much as the 20/4/10 rule's ceiling — the rule of thumb isn't what's holding you back here."}
+        ? tc.gap(ruleVsSustainableGap)
+        : tc.noGap}
     </p>
 
     <div class="breakdown">
-      <p class="section-heading">Cost breakdown at {formatUSD(results.evaluatedPrice)}</p>
+      <p class="section-heading">{tc.costBreakdownAt(results.evaluatedPrice)}</p>
       <dl class="breakdown-list" id="car-breakdown-list">
         <div class="breakdown-row">
-          <dt>Sales tax (financed into the loan)</dt>
+          <dt>{tc.salesTax}</dt>
           <dd id="bd-car-tax" data-bind="carTax">{formatUSD(breakdown.salesTax)}</dd>
         </div>
         <div class="breakdown-row">
-          <dt>Amount financed</dt>
+          <dt>{tc.amountFinanced}</dt>
           <dd id="bd-car-financed" data-bind="carFinanced">{formatUSD(breakdown.amountFinanced)}</dd>
         </div>
         <div class="breakdown-row">
-          <dt>Monthly principal &amp; interest</dt>
+          <dt>{tc.monthlyPrincipalInterest}</dt>
           <dd id="bd-car-pi" data-bind="carPi">{formatUSD(breakdown.principalAndInterest)}</dd>
         </div>
         <div class="breakdown-row">
-          <dt>Monthly insurance</dt>
+          <dt>{tc.monthlyInsurance}</dt>
           <dd id="bd-car-insurance" data-bind="carInsurance">{formatUSD(breakdown.insurance)}</dd>
         </div>
         <div class="breakdown-row breakdown-total">
-          <dt>Total monthly cost</dt>
+          <dt>{tc.totalMonthlyCost}</dt>
           <dd id="bd-car-total" data-bind="carTotal">{formatUSD(breakdown.totalMonthlyCost)}</dd>
         </div>
       </dl>
-      <p class="rule-explainer">Doesn't include fuel, maintenance, or registration — this is the financing cost only.</p>
+      <p class="rule-explainer">{tc.excludes}</p>
     </div>
 
     <div class={`callout leftover-callout ${affordability.householdCanSustain ? "callout-positive" : "callout-negative"}`} id="car-leftover-callout">
-      <p class="stat-label">Left over each month after this car payment, other debts, and real-life expenses</p>
+      <p class="stat-label">{tc.leftoverLabel}</p>
       <p class="stat-value" id="car-leftover-amount" data-bind="carLeftoverAmount">{formatSignedUSD(affordability.leftoverIncome)}</p>
       <p class="leftover-message" id="car-leftover-message">
         {affordability.householdCanSustain
-          ? "This household clears both the 20/4/10-style ratio and a real monthly budget."
-          : "This household would run a monthly deficit at this price — even though it may look affordable by the ratio alone."}
+          ? tc.canSustain
+          : tc.cannotSustain}
       </p>
     </div>
 
     <div class="share-row">
       <label class="field">
-        <span>Share this exact scenario</span>
+        <span>{t.common.shareLabel}</span>
         <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
       </label>
-      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
-      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">{t.common.copyLink}</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>{t.common.copied}</span>
     </div>
   </div>
 </div>

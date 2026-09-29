@@ -4,6 +4,7 @@ import { formatUSD, formatSignedUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
 import { scenarioToQueryString } from "../lib/state/serialize";
 import type { ScenarioState } from "../lib/state/schema";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
 
@@ -17,12 +18,9 @@ function barWidth(pct: number): number {
   return Math.max(0, Math.min(100, pct * 100));
 }
 
-function deltaText(delta: number): string {
-  return delta > 0 ? `${formatUSD(delta)} over target` : `${formatUSD(Math.abs(delta))} under target`;
-}
-
-function renderBudgetResults(scenario: ScenarioState, results: BudgetCalculatorResults): void {
+function renderBudgetResults(scenario: ScenarioState, results: BudgetCalculatorResults, t: CalculatorCopy): void {
   const { budget } = results;
+  const deltaText = t.budget.delta;
 
   const warning = el("housing-exceeds-warning");
   if (warning) warning.hidden = !budget.housingAloneExceedsNeedsTarget;
@@ -59,11 +57,12 @@ export function initBudgetCalculator(): void {
   const form = document.getElementById("budget-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-budget-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeBudgetResults(scenario);
-    renderBudgetResults(scenario, results);
+    renderBudgetResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 

@@ -5,15 +5,9 @@ import type { CalculatorResults } from "../lib/state/computeResults";
 import { computeScaleGeometry } from "../lib/scaleGeometry";
 import { formatUSD, formatSignedUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
-
-const tierLabels: Record<string, string> = {
-  comfortable: "Comfortable",
-  stretch: "Stretch",
-  risky: "Risky",
-  unaffordable: "Unaffordable",
-};
 
 function setBoundText(bindKey: string, text: string): void {
   document.querySelectorAll(`[data-bind="${bindKey}"]`).forEach((n) => {
@@ -21,7 +15,9 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
-function renderResults(scenario: ScenarioState, results: CalculatorResults): void {
+function renderResults(scenario: ScenarioState, results: CalculatorResults, t: CalculatorCopy): void {
+  const tierLabels = t.tiers;
+  const ta = t.affordability;
   const { affordability } = results;
   const { breakdown } = affordability;
 
@@ -29,7 +25,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
   const headline = el("result-headline");
   if (headline) {
     if (results.isUnaffordable) {
-      headline.textContent = "Not affordable at this price yet";
+      headline.textContent = t.common.notAffordableYet;
     } else {
       headline.innerHTML = "";
       const badge = document.createElement("span");
@@ -37,7 +33,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
       badge.id = "result-tier-badge";
       badge.dataset.tier = affordability.tier;
       badge.textContent = tierLabels[affordability.tier];
-      headline.append(badge, document.createTextNode(" — up to "));
+      headline.append(badge, document.createTextNode(t.common.upTo));
       const strong = document.createElement("strong");
       strong.id = "result-evaluated-price";
       strong.dataset.bind = "evaluatedPrice";
@@ -85,7 +81,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
       unaffordableBlock.id = "unaffordable-block";
       const title = document.createElement("p");
       title.className = "callout-title";
-      title.textContent = "What would need to change";
+      title.textContent = ta.whatWouldNeedToChange;
       const list = document.createElement("ul");
       list.id = "unaffordable-reasons";
       unaffordableBlock.append(title, list);
@@ -94,7 +90,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
     const list = el("unaffordable-reasons");
     if (list) {
       list.innerHTML = "";
-      results.unaffordableReasons.forEach((reason) => {
+      ta.unaffordableReasons(results.unaffordableReasons, results.unaffordableReasonDetails).forEach((reason) => {
         const li = document.createElement("li");
         li.textContent = reason;
         list.appendChild(li);
@@ -110,15 +106,12 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
   const gapEl = el("gap-explanation");
   if (gapEl) {
     const gap = results.riskyMax - results.sustainableMax;
-    gapEl.textContent =
-      gap > 500
-        ? `That's a ${formatUSD(gap)} gap — a lender may approve more home than your household's real budget can comfortably carry.`
-        : "Your budget can support at least as much as a lender's generous debt-to-income ceiling — the DTI limit isn't what's holding you back here.";
+    gapEl.textContent = gap > 500 ? ta.gap(gap) : ta.noGap;
   }
 
   // Breakdown
   const sectionHeading = document.querySelector(".breakdown .section-heading");
-  if (sectionHeading) sectionHeading.textContent = `Monthly cost at ${formatUSD(results.evaluatedPrice)}`;
+  if (sectionHeading) sectionHeading.textContent = ta.monthlyCostAt(results.evaluatedPrice);
   setBoundText("pi", formatUSD(breakdown.principalAndInterest));
   setBoundText("tax", formatUSD(breakdown.propertyTax));
   setBoundText("insurance", formatUSD(breakdown.insurance));
@@ -131,7 +124,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
   const pmiRow = el("bd-pmi-row");
   if (pmiRow) pmiRow.hidden = breakdown.pmi <= 0;
   const pmiNote = el("bd-pmi-note");
-  if (pmiNote) pmiNote.textContent = breakdown.pmiDropoffMonth !== null ? ` (drops at month ${breakdown.pmiDropoffMonth})` : "";
+  if (pmiNote) pmiNote.textContent = breakdown.pmiDropoffMonth !== null ? ` ${ta.pmiDrops(breakdown.pmiDropoffMonth)}` : "";
   const hoaRow = el("bd-hoa-row");
   if (hoaRow) hoaRow.hidden = breakdown.hoa <= 0;
 
@@ -144,9 +137,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
   setBoundText("leftoverAmount", formatSignedUSD(affordability.leftoverIncome));
   const leftoverMessage = el("leftover-message");
   if (leftoverMessage) {
-    leftoverMessage.textContent = affordability.householdCanSustain
-      ? "This household clears both the lender's ratios and a real monthly budget."
-      : "This household would run a monthly deficit at this price — even though a lender may still approve it.";
+    leftoverMessage.textContent = affordability.householdCanSustain ? ta.canSustain : ta.cannotSustain;
   }
 
   // Constraints
@@ -159,7 +150,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
       constraintsBlock.id = "constraints-block";
       const heading = document.createElement("p");
       heading.className = "section-heading";
-      heading.textContent = "What's driving this";
+      heading.textContent = ta.whatsDriving;
       const list = document.createElement("ul");
       list.id = "constraints-list";
       constraintsBlock.append(heading, list);
@@ -171,7 +162,7 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
       results.constraints.forEach((c) => {
         const li = document.createElement("li");
         li.dataset.constraintId = c.id;
-        li.textContent = c.description;
+        li.textContent = ta.constraint(c);
         list.appendChild(li);
       });
     }
@@ -186,13 +177,13 @@ function renderResults(scenario: ScenarioState, results: CalculatorResults): voi
   const sensIncome = el("sens-income");
   if (sensIncome) sensIncome.textContent = `${tierLabels[sensitivity.incomeDrop.currentTier]} → ${tierLabels[sensitivity.incomeDrop.droppedTier]}`;
   const sensIncomeNote = el("sens-income-note");
-  if (sensIncomeNote) sensIncomeNote.textContent = `At ${formatUSD(sensitivity.incomeDrop.droppedGrossMonthlyIncome)}/mo gross, holding this home price constant.`;
+  if (sensIncomeNote) sensIncomeNote.textContent = ta.sensIncomeNote(sensitivity.incomeDrop.droppedGrossMonthlyIncome);
   const sensChild = el("sens-child");
   if (sensChild) sensChild.textContent = `${tierLabels[sensitivity.addingChild.currentTier]} → ${tierLabels[sensitivity.addingChild.withChildTier]}`;
   const sensDownPayment = el("sens-downpayment");
-  if (sensDownPayment) sensDownPayment.textContent = `${formatUSD(sensitivity.downPayment.currentTotalMonthly)} → ${formatUSD(sensitivity.downPayment.largerTotalMonthly)}/mo`;
+  if (sensDownPayment) sensDownPayment.textContent = ta.perMonthChange(sensitivity.downPayment.currentTotalMonthly, sensitivity.downPayment.largerTotalMonthly);
   const sensDownPaymentNote = el("sens-downpayment-note");
-  if (sensDownPaymentNote) sensDownPaymentNote.textContent = `PMI: ${formatUSD(sensitivity.downPayment.currentPmiMonthly)} → ${formatUSD(sensitivity.downPayment.largerPmiMonthly)}/mo`;
+  if (sensDownPaymentNote) sensDownPaymentNote.textContent = ta.pmiChange(sensitivity.downPayment.currentPmiMonthly, sensitivity.downPayment.largerPmiMonthly);
 
   // Share link
   const shareInput = el<HTMLInputElement>("share-url");
@@ -206,11 +197,12 @@ export function initCalculator(): void {
   const form = document.getElementById("calculator-form") as HTMLFormElement | null;
   const calculatorRoot = document.querySelector("[data-calculator]");
   if (!form || !calculatorRoot) return;
+  const t = calculatorCopyFor(calculatorRoot);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeResults(scenario);
-    renderResults(scenario, results);
+    renderResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 

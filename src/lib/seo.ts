@@ -1,4 +1,5 @@
-import { formatUSD } from "./format";
+import { CALCULATOR_COPY } from "../i18n/calculators";
+import { DEFAULT_LOCALE, type LocaleCode } from "../i18n/locales";
 import type { CalculatorResults } from "./state/computeResults";
 import type { ScenarioState } from "./state/schema";
 import { getPropertyTaxRate } from "./data/property-tax-by-state";
@@ -10,18 +11,19 @@ import { getPropertyTaxRate } from "./data/property-tax-by-state";
  * marketing copy (spec 3.2 treats shareable scenarios as the primary
  * distribution channel).
  */
-export function scenarioOgCopy(scenario: ScenarioState, results: CalculatorResults): { title: string; description: string } {
+export function scenarioOgCopy(scenario: ScenarioState, results: CalculatorResults, locale: LocaleCode = DEFAULT_LOCALE): { title: string; description: string } {
   const stateName = getPropertyTaxRate(scenario.stateCode).state;
+  const t = CALCULATOR_COPY[locale].og;
 
   if (results.isUnaffordable) {
     return {
-      title: `What it would take to afford a home in ${stateName} — TrueAfford`,
-      description: "This scenario doesn't clear affordability thresholds yet. See exactly what would need to change.",
+      title: t.unaffordableTitle(stateName),
+      description: t.unaffordableDescription,
     };
   }
 
   return {
-    title: `This household can afford up to ${formatUSD(results.evaluatedPrice)} in ${stateName} — TrueAfford`,
-    description: `Comfortable up to ${formatUSD(results.comfortableMax)}, Stretch up to ${formatUSD(results.stretchMax)}, Risky up to ${formatUSD(results.riskyMax)}. Full monthly breakdown, no ads in the result.`,
+    title: t.title(results.evaluatedPrice, stateName),
+    description: t.description(results.comfortableMax, results.stretchMax, results.riskyMax),
   };
 }

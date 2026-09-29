@@ -3,131 +3,137 @@ import { decodeScenario, scenarioToQueryString } from "../../lib/state/serialize
 import { computeRentResults } from "../../lib/state/computeRentResults";
 import { formatUSD, formatSignedUSD } from "../../lib/format";
 
+import { DEFAULT_LOCALE, type LocaleCode } from "../../i18n/locales";
+import { CALCULATOR_COPY } from "../../i18n/calculators";
+
+interface Props {
+  locale?: LocaleCode;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const t = CALCULATOR_COPY[locale];
+
 const scenario = decodeScenario(Astro.url.searchParams);
 const results = computeRentResults(scenario);
 const { rentAffordability } = results;
 
 const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), Astro.site ?? Astro.url.origin).toString();
 
-const ruleLabels: Record<string, string> = {
-  income: "30% of gross income",
-  screening: "40x annual income (landlord screening)",
-  leftover: "Leftover income after real expenses",
-};
+const tr = t.rent;
+const ruleLabels = tr.bindingRules;
 ---
 
-<div class="calculator-grid" data-rent-calculator>
+<div class="calculator-grid" data-rent-calculator data-locale={locale}>
   <form id="rent-form" class="calculator-form-col" method="get">
     <fieldset class="field-group">
-      <legend>Income &amp; debts</legend>
+      <legend>{t.common.incomeAndDebts}</legend>
       <label class="field">
-        <span>Annual household income (gross)</span>
+        <span>{t.common.grossIncome}</span>
         <input type="number" inputmode="numeric" name="gi" id="field-gi" min="0" step="1000" value={scenario.grossAnnualIncome} />
       </label>
       <label class="field">
-        <span>Monthly take-home pay (net)</span>
+        <span>{t.common.netIncome}</span>
         <input type="number" inputmode="numeric" name="ni" id="field-ni" min="0" step="50" value={scenario.netMonthlyIncome} />
       </label>
       <label class="field">
-        <span>Other monthly debt payments</span>
+        <span>{t.common.otherDebts}</span>
         <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
       </label>
     </fieldset>
 
     <fieldset class="field-group">
-      <legend>Real-life monthly expenses</legend>
+      <legend>{t.common.realLifeExpenses}</legend>
       <label class="field">
-        <span>Childcare</span>
+        <span>{t.common.childcare}</span>
         <input type="number" inputmode="numeric" name="ec" id="field-ec" min="0" step="25" value={scenario.childcare} />
       </label>
       <label class="field">
-        <span>Healthcare</span>
+        <span>{t.common.healthcare}</span>
         <input type="number" inputmode="numeric" name="eh" id="field-eh" min="0" step="25" value={scenario.healthcare} />
       </label>
       <label class="field">
-        <span>Groceries</span>
+        <span>{t.common.groceries}</span>
         <input type="number" inputmode="numeric" name="eg" id="field-eg" min="0" step="25" value={scenario.groceries} />
       </label>
       <label class="field">
-        <span>Transport</span>
+        <span>{t.common.transport}</span>
         <input type="number" inputmode="numeric" name="et" id="field-et" min="0" step="25" value={scenario.transport} />
       </label>
       <label class="field">
-        <span>Other</span>
+        <span>{t.common.other}</span>
         <input type="number" inputmode="numeric" name="eo" id="field-eo" min="0" step="25" value={scenario.otherExpenses} />
       </label>
     </fieldset>
 
     <fieldset class="field-group">
-      <legend>Rent-specific costs</legend>
+      <legend>{tr.rentCosts}</legend>
       <label class="field">
-        <span>Renters insurance (monthly)</span>
+        <span>{t.common.rentersInsurance}</span>
         <input type="number" inputmode="numeric" name="ri" id="field-ri" min="0" step="5" value={scenario.rentersInsuranceMonthly} />
       </label>
       <label class="field">
-        <span>Utilities (monthly)</span>
+        <span>{t.common.utilities}</span>
         <input type="number" inputmode="numeric" name="ut" id="field-ut" min="0" step="10" value={scenario.utilitiesMonthly} />
       </label>
     </fieldset>
 
     <noscript>
-      <button type="submit" class="btn-primary">Calculate</button>
+      <button type="submit" class="btn-primary">{t.common.calculate}</button>
     </noscript>
   </form>
 
   <div class="results-col" id="rent-results" aria-live="polite">
     <div>
-      <p class="eyebrow">Your result</p>
+      <p class="eyebrow">{t.common.yourResult}</p>
       <h2 id="rent-headline">
-        Max affordable rent — <strong id="rent-max-affordable" data-bind="maxAffordableRent">{formatUSD(rentAffordability.maxAffordableRent)}</strong>
+        {tr.maxRent} — <strong id="rent-max-affordable" data-bind="maxAffordableRent">{formatUSD(rentAffordability.maxAffordableRent)}</strong>
       </h2>
       <p class="binding-note" id="rent-binding-note">
-        Bound by: <strong id="rent-binding-rule" data-bind="bindingRule">{ruleLabels[rentAffordability.bindingRule]}</strong>
+        {tr.boundBy} <strong id="rent-binding-rule" data-bind="bindingRule">{ruleLabels[rentAffordability.bindingRule]}</strong>
       </p>
     </div>
 
     <dl class="breakdown-list" id="rent-rules-list">
       <div class="breakdown-row" class:list={{ "rule-binding": rentAffordability.bindingRule === "income" }} data-rule="income">
-        <dt>30% of gross income</dt>
+        <dt>{tr.incomeRow}</dt>
         <dd data-bind="incomeRule">{formatUSD(rentAffordability.maxRentByIncomeRule)}</dd>
       </div>
       <div class="breakdown-row" class:list={{ "rule-binding": rentAffordability.bindingRule === "screening" }} data-rule="screening">
-        <dt>40x annual income (screening)</dt>
+        <dt>{tr.screeningRow}</dt>
         <dd data-bind="screeningRule">{formatUSD(rentAffordability.maxRentByScreeningRule)}</dd>
       </div>
       <div class="breakdown-row" class:list={{ "rule-binding": rentAffordability.bindingRule === "leftover" }} data-rule="leftover">
-        <dt>Leftover income after real expenses</dt>
+        <dt>{tr.leftoverRow}</dt>
         <dd data-bind="leftoverRule">{formatUSD(rentAffordability.maxRentByLeftoverRule)}</dd>
       </div>
     </dl>
     <p class="rule-explainer">
-      The 30% rule and the 40x screening rule are mathematically the same threshold — landlords verify it strictly against gross annual income. The leftover-income rule often binds tighter once renters insurance, utilities,
-      and real-life expenses are counted.
+      {tr.explainer}
     </p>
 
     <div class="evaluate-row">
       <label class="field">
-        <span>Test a specific rent</span>
+        <span>{tr.testRent}</span>
         <input type="number" inputmode="numeric" name="er" id="field-er" form="rent-form" min="0" step="50" value={results.isCustomEvaluatedRent ? results.evaluatedRent : ""} placeholder={String(rentAffordability.maxAffordableRent)} />
       </label>
-      <button type="button" id="reset-evaluated-rent" class="btn-ghost-sm" hidden={!results.isCustomEvaluatedRent}>Reset to recommended</button>
+      <button type="button" id="reset-evaluated-rent" class="btn-ghost-sm" hidden={!results.isCustomEvaluatedRent}>{t.common.resetToRecommended}</button>
     </div>
 
     <div class={`callout ${results.isOverBudgetAtEvaluatedRent ? "callout-negative" : "callout-positive"}`} id="rent-leftover-callout">
-      <p class="stat-label">Left over each month at this rent</p>
+      <p class="stat-label">{tr.leftoverLabel}</p>
       <p class="stat-value" id="rent-leftover-amount" data-bind="leftoverAmount">{formatSignedUSD(results.leftoverAtEvaluatedRent)}</p>
       <p class="leftover-message" id="rent-leftover-message">
-        {results.isOverBudgetAtEvaluatedRent ? "This rent is above what this household can sustainably afford by any of the three rules." : "This rent clears all three affordability rules."}
+        {results.isOverBudgetAtEvaluatedRent ? tr.overBudget : tr.clears}
       </p>
     </div>
 
     <div class="share-row">
       <label class="field">
-        <span>Share this exact scenario</span>
+        <span>{t.common.shareLabel}</span>
         <input type="text" id="share-url" readonly value={shareUrl} onfocus="this.select()" />
       </label>
-      <button type="button" id="copy-share-link" class="btn-primary-sm">Copy link</button>
-      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>Copied!</span>
+      <button type="button" id="copy-share-link" class="btn-primary-sm">{t.common.copyLink}</button>
+      <span id="copy-confirmation" role="status" class="copy-confirmation" hidden>{t.common.copied}</span>
     </div>
   </div>
 </div>

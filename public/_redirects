@@ -1,0 +1,18 @@
+# Permanent (301) trailing-slash redirects for prerendered pages.
+# Without these, Cloudflare's asset html_handling answers /about-us with a 307.
+# Rules are exact matches (":param" never matches "/"), so "/about-us/" is not
+# re-matched; the query string is carried over to the target automatically.
+# SSR calculator pages are not listed: Astro already 301s them.
+/about-us /about-us/ 301
+/contact-us /contact-us/ 301
+/methodology /methodology/ 301
+/privacy-policy /privacy-policy/ 301
+/terms-and-conditions /terms-and-conditions/ 301
+/state /state/ 301
+/state/:code /state/:code/ 301
+/salary /salary/ 301
+/salary/:income /salary/:income/ 301
+/es /es/ 301
+/es/about-us /es/about-us/ 301
+/es/contact-us /es/contact-us/ 301
+/es/methodology /es/methodology/ 301

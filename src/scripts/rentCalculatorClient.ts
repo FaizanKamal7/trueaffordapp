@@ -4,14 +4,9 @@ import { formatUSD, formatSignedUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
 import { scenarioToQueryString } from "../lib/state/serialize";
 import type { ScenarioState } from "../lib/state/schema";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
-
-const ruleLabels: Record<string, string> = {
-  income: "30% of gross income",
-  screening: "40x annual income (landlord screening)",
-  leftover: "Leftover income after real expenses",
-};
 
 function setBoundText(bindKey: string, text: string): void {
   document.querySelectorAll(`[data-bind="${bindKey}"]`).forEach((n) => {
@@ -19,8 +14,9 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
-function renderRentResults(scenario: ScenarioState, results: RentCalculatorResults): void {
+function renderRentResults(scenario: ScenarioState, results: RentCalculatorResults, t: CalculatorCopy): void {
   const { rentAffordability } = results;
+  const ruleLabels = t.rent.bindingRules;
 
   setBoundText("maxAffordableRent", formatUSD(rentAffordability.maxAffordableRent));
   setBoundText("bindingRule", ruleLabels[rentAffordability.bindingRule]);
@@ -47,9 +43,7 @@ function renderRentResults(scenario: ScenarioState, results: RentCalculatorResul
   setBoundText("leftoverAmount", formatSignedUSD(results.leftoverAtEvaluatedRent));
   const message = el("rent-leftover-message");
   if (message) {
-    message.textContent = results.isOverBudgetAtEvaluatedRent
-      ? "This rent is above what this household can sustainably afford by any of the three rules."
-      : "This rent clears all three affordability rules.";
+    message.textContent = results.isOverBudgetAtEvaluatedRent ? t.rent.overBudget : t.rent.clears;
   }
 
   const shareInput = el<HTMLInputElement>("share-url");
@@ -62,11 +56,12 @@ export function initRentCalculator(): void {
   const form = document.getElementById("rent-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-rent-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeRentResults(scenario);
-    renderRentResults(scenario, results);
+    renderRentResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 

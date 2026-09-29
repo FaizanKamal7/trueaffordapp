@@ -4,6 +4,7 @@ import { formatUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
 import { scenarioToQueryString } from "../lib/state/serialize";
 import type { ScenarioState } from "../lib/state/schema";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
 
@@ -13,25 +14,18 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
-function monthsToYearsMonths(months: number): string {
-  const y = Math.floor(months / 12);
-  const m = months % 12;
-  if (y === 0) return `${m} mo`;
-  if (m === 0) return `${y} yr`;
-  return `${y} yr ${m} mo`;
-}
-
-function renderAmortizationResults(scenario: ScenarioState, results: AmortizationCalculatorResults): void {
+function renderAmortizationResults(scenario: ScenarioState, results: AmortizationCalculatorResults, t: CalculatorCopy): void {
   const { amortization } = results;
+  const tm = t.amortization;
 
   setBoundText("loanAmount", formatUSD(results.loanAmount));
-  setBoundText("payoffTime", monthsToYearsMonths(amortization.payoffMonth));
+  setBoundText("payoffTime", tm.duration(amortization.payoffMonth));
   setBoundText("totalInterest", formatUSD(amortization.totalInterestPaid));
 
   const savingsCallout = el<HTMLElement>("savings-callout");
   if (savingsCallout) savingsCallout.hidden = scenario.extraMonthlyPayment <= 0;
-  setBoundText("interestSaved", `${formatUSD(amortization.interestSaved)} saved`);
-  setBoundText("monthsSaved", `${amortization.monthsSaved} months removed from the loan`);
+  setBoundText("interestSaved", tm.saved(amortization.interestSaved));
+  setBoundText("monthsSaved", tm.monthsSaved(amortization.monthsSaved));
 
   const tbody = el("year-table-body");
   if (tbody) {
@@ -58,11 +52,12 @@ export function initAmortizationCalculator(): void {
   const form = document.getElementById("amortization-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-amortization-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeAmortizationResults(scenario);
-    renderAmortizationResults(scenario, results);
+    renderAmortizationResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 

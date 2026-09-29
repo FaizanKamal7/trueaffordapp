@@ -3,6 +3,7 @@ import { computeResults } from "../lib/state/computeResults";
 import { formatUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
 import { scenarioToQueryString } from "../lib/state/serialize";
+import { calculatorCopyFor } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
 
@@ -16,6 +17,7 @@ export function initClosingCostsCalculator(): void {
   const form = document.getElementById("closing-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-closing-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
@@ -24,7 +26,7 @@ export function initClosingCostsCalculator(): void {
 
     setBoundText("totalCashTypical", formatUSD(closingCosts.totalCashNeededTypical));
     setBoundText("totalCashTypical2", formatUSD(closingCosts.totalCashNeededTypical));
-    setBoundText("rangeNote", `Range: ${formatUSD(closingCosts.totalCashNeededLow)} – ${formatUSD(closingCosts.totalCashNeededHigh)}`);
+    setBoundText("rangeNote", t.closing.range(closingCosts.totalCashNeededLow, closingCosts.totalCashNeededHigh));
     setBoundText("downPayment", formatUSD(scenario.downPaymentDollars));
     setBoundText("ccLow", formatUSD(closingCosts.low));
     setBoundText("ccTypical", formatUSD(closingCosts.typical));

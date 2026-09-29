@@ -13,7 +13,7 @@ const locale = "es" as const;
 
 const scenario = decodeScenario(Astro.url.searchParams);
 const results = computeResults(scenario);
-const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results) : undefined;
+const ogCopy = Astro.url.search !== "" ? scenarioOgCopy(scenario, results, locale) : undefined;
 
 const title = "Calculadora de Asequibilidad de Casa — El Costo Real de Ser Propietario, No Solo de Pedir Prestado | TrueAfford";
 const description =
@@ -59,6 +59,6 @@ const description =
       { href: localizedPath(locale, "methodology"), label: "Metodología" },
     ]}
   >
-    <AffordabilityCalculator />
+    <AffordabilityCalculator locale={locale} />
   </CalculatorPageShell>
 </Layout>

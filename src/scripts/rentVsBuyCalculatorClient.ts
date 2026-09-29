@@ -5,10 +5,9 @@ import { formatUSD, formatSignedUSD } from "../lib/format";
 import { el, readScenarioFromForm, persistAndSyncUrl, restoreFromSessionStorage, debounce } from "../lib/domScenario";
 import { scenarioToQueryString } from "../lib/state/serialize";
 import type { ScenarioState } from "../lib/state/schema";
+import { calculatorCopyFor, type CalculatorCopy } from "../i18n/calculators";
 
 const DEBOUNCE_MS = 200;
-
-const CHOICE_LABELS: Record<string, string> = { buy: "Buying", rent: "Renting", "roughly equal": "Roughly a tie" };
 
 function setBoundText(bindKey: string, text: string): void {
   document.querySelectorAll(`[data-bind="${bindKey}"]`).forEach((n) => {
@@ -16,24 +15,22 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
-function renderRentVsBuyResults(scenario: ScenarioState, results: RentVsBuyCalculatorResults): void {
+function renderRentVsBuyResults(scenario: ScenarioState, results: RentVsBuyCalculatorResults, t: CalculatorCopy): void {
   const { simulation } = results;
+  const tv = t.rentVsBuy;
   const diff = Math.abs(simulation.netWorthAtTenure.buyer - simulation.netWorthAtTenure.renter);
 
-  const eyebrow = document.querySelector(".eyebrow");
-  if (eyebrow) eyebrow.textContent = `At ${results.tenureYears} years`;
+  const eyebrow = document.querySelector("#rvb-results .eyebrow");
+  if (eyebrow) eyebrow.textContent = tv.atYears(results.tenureYears);
 
-  setBoundText("choice", CHOICE_LABELS[simulation.betterChoiceAtTenure]);
+  setBoundText("choice", tv.choices[simulation.betterChoiceAtTenure]);
   setBoundText("diff", formatUSD(diff));
   setBoundText("buyerNetWorth", formatSignedUSD(simulation.netWorthAtTenure.buyer));
   setBoundText("renterNetWorth", formatSignedUSD(simulation.netWorthAtTenure.renter));
 
   const breakeven = el("rvb-breakeven");
   if (breakeven) {
-    breakeven.textContent =
-      simulation.breakevenYear !== null
-        ? `Buying overtakes renting in net worth around year ${simulation.breakevenYear}.`
-        : "Buying doesn't overtake renting in net worth within 30 years at these assumptions.";
+    breakeven.textContent = simulation.breakevenYear !== null ? tv.breakeven(simulation.breakevenYear) : tv.noBreakeven;
   }
 
   const geometry = computeRentVsBuyChartGeometry(simulation.timeline, results.tenureYears, simulation.breakevenYear);
@@ -82,11 +79,12 @@ export function initRentVsBuyCalculator(): void {
   const form = document.getElementById("rvb-form") as HTMLFormElement | null;
   const root = document.querySelector("[data-rentvsbuy-calculator]");
   if (!form || !root) return;
+  const t = calculatorCopyFor(root);
 
   const recompute = () => {
     const scenario = readScenarioFromForm();
     const results = computeRentVsBuyResults(scenario);
-    renderRentVsBuyResults(scenario, results);
+    renderRentVsBuyResults(scenario, results, t);
     persistAndSyncUrl(scenario);
   };
 
