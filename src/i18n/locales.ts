@@ -27,11 +27,17 @@ export function getLocale(code: LocaleCode): LocaleConfig {
 }
 
 /**
- * Builds an absolute, locale-prefixed path for a page slug.
+ * Builds an absolute, locale-prefixed path for a page slug, always ending in "/"
+ * (the site's canonical URL format — see `trailingSlash` in astro.config.mjs).
  * `slug` is "" for the home page, otherwise a path like "mortgage-calculator".
  */
 export function localizedPath(code: LocaleCode, slug: string): string {
   const { path } = getLocale(code);
-  if (path === "") return slug === "" ? "/" : `/${slug}`;
-  return slug === "" ? `/${path}` : `/${path}/${slug}`;
+  if (path === "") return slug === "" ? "/" : `/${slug}/`;
+  return slug === "" ? `/${path}/` : `/${path}/${slug}/`;
+}
+
+/** Normalizes a URL pathname to the site's trailing-slash convention. */
+export function withTrailingSlash(pathname: string): string {
+  return pathname.endsWith("/") ? pathname : `${pathname}/`;
 }

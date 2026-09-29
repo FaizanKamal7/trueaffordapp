@@ -22,7 +22,7 @@ const results = computeResults(scenario);
 
 const taxEntry = getPropertyTaxRate(stateCode);
 const insuranceEntry = getInsuranceRate(stateCode);
-const calculatorHref = `/mortgage-calculator${scenarioToQueryString(scenario)}`;
+const calculatorHref = `/mortgage-calculator/${scenarioToQueryString(scenario)}`;
 
 const statesByTaxRateAsc = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.effectiveRatePct - b.effectiveRatePct);
 const taxRank = statesByTaxRateAsc.findIndex((e) => e.stateCode === stateCode) + 1;
@@ -120,11 +120,11 @@ const gap = results.riskyMax - results.sustainableMax;
   <section class="container section nav-section">
     <p class="section-heading">Other states</p>
     <p class="state-nav">
-      {prevState !== null && <a href={`/state/${prevState.stateCode.toLowerCase()}`}>← {prevState.state}</a>}
-      {nextState !== null && <a href={`/state/${nextState.stateCode.toLowerCase()}`}>{nextState.state} →</a>}
+      {prevState !== null && <a href={`/state/${prevState.stateCode.toLowerCase()}/`}>← {prevState.state}</a>}
+      {nextState !== null && <a href={`/state/${nextState.stateCode.toLowerCase()}/`}>{nextState.state} →</a>}
     </p>
     <p class="cross-links">
-      <a href="/state">Browse all states</a> · <a href="/salary">Browse by income</a> · <a href="/mortgage-calculator">Full mortgage calculator</a> · <a href="/methodology#property-tax">Methodology</a>
+      <a href="/state/">Browse all states</a> · <a href="/salary/">Browse by income</a> · <a href="/mortgage-calculator/">Full mortgage calculator</a> · <a href="/methodology/#property-tax">Methodology</a>
     </p>
   </section>
 </Layout>

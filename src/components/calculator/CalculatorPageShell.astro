@@ -1,5 +1,5 @@
 ---
-import { DEFAULT_LOCALE, localizedPath, type LocaleCode } from "../../i18n/locales";
+import { DEFAULT_LOCALE, localizedPath, withTrailingSlash, type LocaleCode } from "../../i18n/locales";
 import { CHROME } from "../../i18n/chrome";
 import Faq from "../layout/Faq.astro";
 
@@ -39,7 +39,7 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 2,
       name: heading,
-      item: new URL(Astro.url.pathname, site).toString(),
+      item: new URL(withTrailingSlash(Astro.url.pathname), site).toString(),
     },
   ],
 };

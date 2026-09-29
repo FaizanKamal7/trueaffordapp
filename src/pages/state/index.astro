@@ -20,7 +20,7 @@ const description = "See what a typical household can afford in any U.S. state, 
       {
         states.map((entry) => (
           <li>
-            <a href={`/state/${entry.stateCode.toLowerCase()}`}>{entry.state}</a>
+            <a href={`/state/${entry.stateCode.toLowerCase()}/`}>{entry.state}</a>
           </li>
         ))
       }

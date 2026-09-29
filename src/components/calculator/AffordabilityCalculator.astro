@@ -44,13 +44,13 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
       </label>
 
       <label class="field">
-        <span>Other monthly debt payments <a class="info-link" href="/methodology#dti" aria-label="Why this matters">?</a></span>
+        <span>Other monthly debt payments <a class="info-link" href="/methodology/#dti" aria-label="Why this matters">?</a></span>
         <input type="number" inputmode="numeric" name="od" id="field-od" min="0" step="25" value={scenario.otherMonthlyDebts} />
       </label>
     </fieldset>
 
     <fieldset class="field-group">
-      <legend>Real-life monthly expenses <a class="info-link" href="/methodology#leftover-income" aria-label="Why this matters">?</a></legend>
+      <legend>Real-life monthly expenses <a class="info-link" href="/methodology/#leftover-income" aria-label="Why this matters">?</a></legend>
       <p class="field-group-note">Lenders don't count these against you — but they determine whether the payment actually fits.</p>
 
       <label class="field">
@@ -110,7 +110,7 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
       </label>
 
       <label class="field">
-        <span>Interest rate override (%) <a class="info-link" href="/methodology#rates" aria-label="Why this matters">?</a></span>
+        <span>Interest rate override (%) <a class="info-link" href="/methodology/#rates" aria-label="Why this matters">?</a></span>
         <input
           type="number"
           inputmode="decimal"
@@ -248,7 +248,7 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
         </div>
         <div class="breakdown-row">
           <dt>
-            Maintenance reserve (1%/yr) <a class="info-link" href="/methodology#maintenance" aria-label="Why this matters">?</a>
+            Maintenance reserve (1%/yr) <a class="info-link" href="/methodology/#maintenance" aria-label="Why this matters">?</a>
           </dt>
           <dd id="bd-maintenance" data-bind="maintenance">{formatUSD(breakdown.maintenance)}</dd>
         </div>
@@ -285,7 +285,7 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
     }
 
     <div class="sensitivity" id="sensitivity-panel">
-      <p class="section-heading">What would change this <a class="info-link" href="/methodology#sensitivity" aria-label="Why this matters">?</a></p>
+      <p class="section-heading">What would change this <a class="info-link" href="/methodology/#sensitivity" aria-label="Why this matters">?</a></p>
       <div class="sensitivity-grid">
         <div class="sensitivity-card">
           <p class="sensitivity-label">Interest rate ±1 point</p>

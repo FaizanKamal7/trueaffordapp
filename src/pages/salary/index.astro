@@ -27,7 +27,7 @@ const description = "See what a household can typically afford at any salary fro
       {
         incomes.map((income) => (
           <li>
-            <a href={`/salary/${income}`}>{formatUSD(income)}</a>
+            <a href={`/salary/${income}/`}>{formatUSD(income)}</a>
           </li>
         ))
       }

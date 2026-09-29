@@ -31,7 +31,7 @@ const scenario: ScenarioState = {
 
 const results = computeResults(scenario);
 const stateName = getPropertyTaxRate(scenario.stateCode).state;
-const calculatorHref = `/mortgage-calculator${scenarioToQueryString(scenario)}`;
+const calculatorHref = `/mortgage-calculator/${scenarioToQueryString(scenario)}`;
 
 const incomeLabel = formatUSD(grossAnnualIncome).replace(/\.00$/, "");
 const title = `What Can You Afford on a ${incomeLabel} Salary? | TrueAfford`;
@@ -98,11 +98,11 @@ const higherIncome = grossAnnualIncome < MAX_INCOME ? grossAnnualIncome + INCOME
   <section class="container section nav-section">
     <p class="section-heading">Other income levels</p>
     <p class="income-nav">
-      {lowerIncome !== null && <a href={`/salary/${lowerIncome}`}>← {formatUSD(lowerIncome)}</a>}
-      {higherIncome !== null && <a href={`/salary/${higherIncome}`}>{formatUSD(higherIncome)} →</a>}
+      {lowerIncome !== null && <a href={`/salary/${lowerIncome}/`}>← {formatUSD(lowerIncome)}</a>}
+      {higherIncome !== null && <a href={`/salary/${higherIncome}/`}>{formatUSD(higherIncome)} →</a>}
     </p>
     <p class="cross-links">
-      <a href="/salary">Browse all income levels</a> · <a href="/state">Browse by state</a> · <a href="/mortgage-calculator">Full mortgage calculator</a> · <a href="/methodology">Methodology</a>
+      <a href="/salary/">Browse all income levels</a> · <a href="/state/">Browse by state</a> · <a href="/mortgage-calculator/">Full mortgage calculator</a> · <a href="/methodology/">Methodology</a>
     </p>
   </section>
 </Layout>

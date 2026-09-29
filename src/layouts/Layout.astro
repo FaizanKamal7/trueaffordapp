@@ -3,7 +3,7 @@ import Nav from "../components/layout/Nav.astro";
 import Footer from "../components/layout/Footer.astro";
 import StickyLegalBar from "../components/layout/StickyLegalBar.astro";
 import "../styles/global.css";
-import { DEFAULT_LOCALE, LOCALES, getLocale, localizedPath, type LocaleCode } from "../i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, getLocale, localizedPath, withTrailingSlash, type LocaleCode } from "../i18n/locales";
 import { CHROME } from "../i18n/chrome";
 
 interface Props {
@@ -29,7 +29,12 @@ const localeConfig = getLocale(locale);
 const t = CHROME[locale];
 // Calculator scenarios are encoded in query parameters. They remain shareable,
 // but all variants consolidate their indexing signals at the stable page URL.
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+// The canonical is derived from the page identity (not the requested URL), so
+// "/x" and "/x/" both canonicalize to the trailing-slash form.
+const canonicalPath = translationSlug !== undefined
+  ? localizedPath(locale, translationSlug)
+  : withTrailingSlash(Astro.url.pathname);
+const canonicalURL = new URL(canonicalPath, Astro.site ?? Astro.url.origin);
 const ogImageURL = new URL("/og-default.png", Astro.site ?? Astro.url.origin);
 // Calculator pages use a long-form title as source copy. Keep the primary
 // keyword and brand in the document title; the fuller text remains available

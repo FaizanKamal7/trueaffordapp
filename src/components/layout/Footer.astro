@@ -27,8 +27,8 @@ const calculatorLinks = [
 const englishOnly = locale !== "en";
 const withEnglishOnlyTag = (label: string) => (englishOnly ? `${label} (EN)` : label);
 const browseLinks = [
-  { href: "/salary", label: withEnglishOnlyTag(t.footer.byIncome) },
-  { href: "/state", label: withEnglishOnlyTag(t.footer.byState) },
+  { href: "/salary/", label: withEnglishOnlyTag(t.footer.byIncome) },
+  { href: "/state/", label: withEnglishOnlyTag(t.footer.byState) },
 ];
 
 const companyLinks = [
@@ -39,8 +39,8 @@ const companyLinks = [
 
 // Privacy policy and terms aren't translated yet, so these always point at the English pages.
 const legalLinks = [
-  { href: "/privacy-policy", label: withEnglishOnlyTag(t.footer.privacyPolicy) },
-  { href: "/terms-and-conditions", label: withEnglishOnlyTag(t.footer.termsAndConditions) },
+  { href: "/privacy-policy/", label: withEnglishOnlyTag(t.footer.privacyPolicy) },
+  { href: "/terms-and-conditions/", label: withEnglishOnlyTag(t.footer.termsAndConditions) },
 ];
 ---
 

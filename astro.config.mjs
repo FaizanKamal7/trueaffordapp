@@ -7,6 +7,11 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://trueaffordapp.com',
+  // Every page URL ends in "/" (matches the directory build output and the sitemap).
+  trailingSlash: 'always',
+  build: {
+    format: 'directory',
+  },
   adapter: cloudflare(),
   i18n: {
     defaultLocale: 'en',
@@ -25,7 +30,7 @@ export default defineConfig({
       i18n: {
         defaultLocale: 'en',
         locales: {
-          en: 'en-US',
+          en: 'en',
           es: 'es',
         },
       },
