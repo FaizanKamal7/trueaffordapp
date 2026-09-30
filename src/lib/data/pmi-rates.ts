@@ -25,7 +25,8 @@ export type CreditBand = "760+" | "740-759" | "720-739" | "700-719" | "680-699" 
 
 export const CREDIT_BANDS: CreditBand[] = ["760+", "740-759", "720-739", "700-719", "680-699", "660-679", "640-659", "620-639"];
 
-const SOURCE = "Illustrative rates compiled from the shape of published mortgage insurer (MGIC/Radian/Essent-style) rate cards";
+const SOURCE =
+  "Illustrative estimates modeled on how published mortgage insurer rate cards (e.g. MGIC, Radian, Essent) price PMI by credit score and loan-to-value. Not taken from any single rate card and not a quote";
 const LAST_UPDATED = "2026-09-17";
 
 /**

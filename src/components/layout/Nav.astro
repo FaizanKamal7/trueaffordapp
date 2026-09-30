@@ -34,7 +34,7 @@ const currentPath = Astro.url.pathname;
         <img src="/logo.png" alt="" width="44" height="44" class="logo-mark" />
         TrueAfford
       </a>
-      <nav aria-label="Primary">
+      <nav aria-label="Primary" class="nav-primary">
         <ul class="nav-list">
           {
             navLinks.map((link) => (
@@ -133,7 +133,7 @@ const currentPath = Astro.url.pathname;
     position: sticky;
     top: 0;
     z-index: 20;
-    transition: padding 0.2s ease;
+    transition: padding-block 0.2s ease;
   }
 
   .nav-bar {
@@ -150,6 +150,11 @@ const currentPath = Astro.url.pathname;
       box-shadow 0.2s ease;
   }
 
+  /*
+    Stuck state moves the outer padding inside the bar instead of dropping it,
+    so the sticky header's height (and everything below it) never shifts.
+    Both paddings share one duration/easing, so their sum stays constant mid-transition.
+  */
   .nav-shell.is-stuck {
     padding-block: 0;
   }
@@ -162,6 +167,10 @@ const currentPath = Astro.url.pathname;
     box-shadow: var(--shadow-nav);
   }
 
+  .nav-shell.is-stuck .nav-inner {
+    padding-block: calc(var(--space-sm) * 2);
+  }
+
   .nav-inner {
     display: flex;
     align-items: center;
@@ -169,6 +178,7 @@ const currentPath = Astro.url.pathname;
     gap: var(--space-md);
     padding-block: var(--space-sm);
     flex-wrap: wrap;
+    transition: padding-block 0.2s ease;
   }
 
   .wordmark {
@@ -312,5 +322,36 @@ const currentPath = Astro.url.pathname;
     color: var(--color-ink);
     font-weight: 500;
     background: var(--color-hairline-soft);
+  }
+
+  /* Single-row header on small screens: the primary links are also in the footer. */
+  @media (max-width: 900px) {
+    .nav-primary {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .nav-bar {
+      width: calc(100% - (var(--space-sm) * 2));
+    }
+
+    .nav-inner {
+      padding-inline: var(--space-md);
+      gap: var(--space-sm);
+    }
+  }
+
+  @media (max-width: 360px) {
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+    }
+
+    .theme-toggle,
+    .lang-switch-trigger {
+      width: 36px;
+      height: 36px;
+    }
   }
 </style>

@@ -30,6 +30,12 @@ const tm = t.amortization;
 
 <div class="calculator-grid" data-amortization-calculator data-locale={locale}>
   <form id="amortization-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{tm.eyebrow}</p>
+      <p class="mobile-result-value">{tm.payoffTime}: <span data-bind="payoffTime">{tm.duration(amortization.payoffMonth)}</span></p>
+      <p class="mobile-result-note">{tm.totalInterest}: <span data-bind="totalInterest">{formatUSD(amortization.totalInterestPaid)}</span></p>
+      <a href="#amortization-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{tm.loan}</legend>
       <label class="field">
@@ -106,6 +112,14 @@ const tm = t.amortization;
       <p class="stat-value" id="interest-saved" data-bind="interestSaved">{tm.saved(amortization.interestSaved)}</p>
       <p class="leftover-message" id="months-saved" data-bind="monthsSaved">
         {tm.monthsSaved(amortization.monthsSaved)}
+      </p>
+    </div>
+
+    <div class="callout callout-positive" id="example-callout" hidden={results.extraPaymentExample === null}>
+      <p class="stat-label" id="example-label">{tm.exampleLabel(results.extraPaymentExample?.extraMonthlyPayment ?? 0)}</p>
+      <p class="stat-value" id="example-interest-saved">{tm.saved(results.extraPaymentExample?.interestSaved ?? 0)}</p>
+      <p class="leftover-message" id="example-months-saved">
+        {tm.monthsSaved(results.extraPaymentExample?.monthsSaved ?? 0)}
       </p>
     </div>
 

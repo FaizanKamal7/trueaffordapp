@@ -37,6 +37,25 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
 
 <div class="calculator" data-calculator data-locale={locale}>
   <form id="calculator-form" class="calculator-form" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{t.common.yourResult}</p>
+      <p class="mobile-result-value" id="mobile-result-headline">
+        {
+          results.isUnaffordable ? (
+            t.common.notAffordableYet
+          ) : (
+            <>
+              <span class="tier-badge" data-tier={affordability.tier}>
+                {tierLabels[affordability.tier]}
+              </span>{" "}
+              {t.common.upTo.trimStart()}<strong>{formatUSD(results.evaluatedPrice)}</strong>
+            </>
+          )
+        }
+      </p>
+      <p class="mobile-result-note">{t.common.sustainUpTo} <span data-bind="sustainableMax">{formatUSD(results.sustainableMax)}</span></p>
+      <a href="#results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{t.common.incomeAndDebts}</legend>
 
@@ -430,19 +449,6 @@ const lenderSustainableGap = results.riskyMax - results.sustainableMax;
     align-items: center;
     gap: var(--space-xxs);
     min-height: 44px;
-  }
-
-  .info-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--color-hairline);
-    font-size: 11px;
-    text-decoration: none;
-    color: var(--color-mute);
   }
 
   .results {

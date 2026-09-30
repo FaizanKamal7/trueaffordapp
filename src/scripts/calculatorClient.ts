@@ -15,32 +15,40 @@ function setBoundText(bindKey: string, text: string): void {
   });
 }
 
+/** Tier badge + "up to $X", or the not-affordable message. `withIds` marks the primary (#results) headline. */
+function renderHeadline(target: HTMLElement, results: CalculatorResults, t: CalculatorCopy, withIds: boolean): void {
+  if (results.isUnaffordable) {
+    target.textContent = t.common.notAffordableYet;
+    return;
+  }
+  const { tier } = results.affordability;
+  target.innerHTML = "";
+  const badge = document.createElement("span");
+  badge.className = "tier-badge";
+  badge.dataset.tier = tier;
+  badge.textContent = t.tiers[tier];
+  target.append(badge, document.createTextNode(t.common.upTo));
+  const strong = document.createElement("strong");
+  strong.textContent = formatUSD(results.evaluatedPrice);
+  if (withIds) {
+    badge.id = "result-tier-badge";
+    strong.id = "result-evaluated-price";
+    strong.dataset.bind = "evaluatedPrice";
+  }
+  target.append(strong);
+}
+
 function renderResults(scenario: ScenarioState, results: CalculatorResults, t: CalculatorCopy): void {
   const tierLabels = t.tiers;
   const ta = t.affordability;
   const { affordability } = results;
   const { breakdown } = affordability;
 
-  // Headline
+  // Headline (plus its compact mobile copy at the top of the form)
   const headline = el("result-headline");
-  if (headline) {
-    if (results.isUnaffordable) {
-      headline.textContent = t.common.notAffordableYet;
-    } else {
-      headline.innerHTML = "";
-      const badge = document.createElement("span");
-      badge.className = "tier-badge";
-      badge.id = "result-tier-badge";
-      badge.dataset.tier = affordability.tier;
-      badge.textContent = tierLabels[affordability.tier];
-      headline.append(badge, document.createTextNode(t.common.upTo));
-      const strong = document.createElement("strong");
-      strong.id = "result-evaluated-price";
-      strong.dataset.bind = "evaluatedPrice";
-      strong.textContent = formatUSD(results.evaluatedPrice);
-      headline.append(strong);
-    }
-  }
+  if (headline) renderHeadline(headline, results, t, true);
+  const mobileHeadline = el("mobile-result-headline");
+  if (mobileHeadline) renderHeadline(mobileHeadline, results, t, false);
 
   // Scale bar
   const geometry = computeScaleGeometry({

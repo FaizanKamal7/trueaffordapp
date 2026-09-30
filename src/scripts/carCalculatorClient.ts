@@ -41,6 +41,10 @@ function renderCarResults(scenario: ScenarioState, results: CarCalculatorResults
       headline.append(strong);
     }
   }
+  const mobileHeadline = el("car-mobile-headline");
+  if (mobileHeadline) {
+    mobileHeadline.textContent = results.isUnaffordable ? t.common.notAffordableYet : `${tierLabels[affordability.tier]}${t.common.upTo}${formatUSD(results.evaluatedPrice)}`;
+  }
 
   // Scale bar
   const geometry = computeScaleGeometry({

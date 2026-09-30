@@ -8,6 +8,7 @@ import { decodeScenario } from "../../lib/state/serialize";
 import { computeResults } from "../../lib/state/computeResults";
 import { scenarioOgCopy } from "../../lib/seo";
 import { localizedPath } from "../../i18n/locales";
+import { salaryFaqAnswer } from "../../lib/salaryBaseline";
 
 const locale = "es" as const;
 
@@ -54,8 +55,7 @@ const description =
       },
       {
         question: "Gano $70,000 al año, ¿cuánta casa puedo pagar?",
-        answer:
-          "Con $70,000 al año (unos $5,833/mes brutos), una razón inicial estándar del 28% coloca tu presupuesto de vivienda alrededor de $1,630/mes, lo cual — dependiendo de tu tasa de interés, enganche, impuesto predial y seguro — a menudo cae en un rango de precio de vivienda de aproximadamente $220,000 a $280,000. Esa cifra se mueve mucho según tus deudas existentes, el tamaño de tu enganche y tus gastos mensuales reales, así que vale la pena ingresar tus números reales en la calculadora de arriba en lugar de confiar en una regla general.",
+        answer: salaryFaqAnswer(70_000, locale),
       },
       {
         question: "¿Cuánto puedo pagar para comprar una casa?",

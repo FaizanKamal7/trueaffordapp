@@ -23,6 +23,12 @@ const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), A
 
 <div class="calculator-grid" data-closing-calculator data-locale={locale}>
   <form id="closing-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{t.closing.eyebrow}</p>
+      <p class="mobile-result-value"><span data-bind="totalCashTypical">{formatUSD(closingCosts.totalCashNeededTypical)}</span> {t.closing.typical}</p>
+      <p class="mobile-result-note" data-bind="rangeNote">{t.closing.range(closingCosts.totalCashNeededLow, closingCosts.totalCashNeededHigh)}</p>
+      <a href="#closing-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{t.closing.purchase}</legend>
       <label class="field">

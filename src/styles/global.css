@@ -60,6 +60,13 @@ textarea {
   outline-offset: 2px;
 }
 
+/* Keep in-page anchor targets (#results, methodology #dti/#rates/…) clear of the sticky header. */
+#results,
+[id$="-results"],
+section[id] {
+  scroll-margin-top: var(--nav-offset);
+}
+
 .container {
   width: 100%;
   max-width: var(--container-max);

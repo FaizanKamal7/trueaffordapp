@@ -28,10 +28,18 @@ const shareUrl = new URL(Astro.url.pathname + scenarioToQueryString(scenario), A
 const tv = t.rentVsBuy;
 const choiceLabels = tv.choices;
 const diff = Math.abs(simulation.netWorthAtTenure.buyer - simulation.netWorthAtTenure.renter);
+const connector = simulation.betterChoiceAtTenure === "roughly equal" ? tv.tieWithin : tv.aheadBy;
 ---
 
 <div class="calculator-grid" data-rentvsbuy-calculator data-locale={locale}>
   <form id="rvb-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow" data-bind="atYears">{tv.atYears(results.tenureYears)}</p>
+      <p class="mobile-result-value">
+        <span data-bind="choice">{choiceLabels[simulation.betterChoiceAtTenure]}</span> <span data-bind="connector">{connector}</span> <span data-bind="diff">{formatUSD(diff)}</span>
+      </p>
+      <a href="#rvb-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{tv.buyingScenario}</legend>
       <label class="field">
@@ -104,9 +112,9 @@ const diff = Math.abs(simulation.netWorthAtTenure.buyer - simulation.netWorthAtT
 
   <div class="results-col" id="rvb-results" aria-live="polite">
     <div>
-      <p class="eyebrow">{tv.atYears(results.tenureYears)}</p>
+      <p class="eyebrow" data-bind="atYears">{tv.atYears(results.tenureYears)}</p>
       <h2 id="rvb-headline">
-        <strong id="rvb-choice" data-bind="choice">{choiceLabels[simulation.betterChoiceAtTenure]}</strong> {tv.aheadBy}
+        <strong id="rvb-choice" data-bind="choice">{choiceLabels[simulation.betterChoiceAtTenure]}</strong> <span data-bind="connector">{connector}</span>
         <strong id="rvb-diff" data-bind="diff">{formatUSD(diff)}</strong>
       </h2>
       <p class="breakeven-note" id="rvb-breakeven">

@@ -29,6 +29,11 @@ function barWidth(pct: number): number {
 
 <div class="calculator-grid" data-budget-calculator data-locale={locale}>
   <form id="budget-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{tb.heading}</p>
+      <p class="mobile-result-note" data-bind="verdict">{tb.verdict(budget)}</p>
+      <a href="#budget-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{t.common.incomeAndDebts}</legend>
       <label class="field">
@@ -97,8 +102,8 @@ function barWidth(pct: number): number {
 
   <div class="results-col" id="budget-results" aria-live="polite">
     <div>
-      <p class="eyebrow">{tb.eyebrow}</p>
-      <h2>{tb.heading}</h2>
+      <p class="eyebrow">{tb.heading}</p>
+      <h2 id="budget-verdict" data-bind="verdict">{tb.verdict(budget)}</h2>
     </div>
 
     {

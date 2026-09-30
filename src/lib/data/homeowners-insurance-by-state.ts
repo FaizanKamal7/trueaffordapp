@@ -2,9 +2,10 @@
  * Average annual homeowner's insurance premium by state, referenced to a
  * $300,000 dwelling coverage amount (HO-3, standard policy).
  *
- * Source: compiled from publicly published 2026 annual homeowner's
- * insurance rate surveys (Insurify-style aggregated studies of average
- * premiums by state at $300k dwelling coverage). Actual premiums vary
+ * Source: approximations of state-average premiums at $300k dwelling
+ * coverage. No single named, citable primary survey has been verified for
+ * these values — do not attribute them to a specific publisher until one
+ * is confirmed and the values are checked against it. Actual premiums vary
  * heavily by coverage amount, deductible, construction, claims history,
  * and — especially in FL/LA/TX/coastal and wildfire-exposed states — by
  * carrier availability, which shifts year to year. California in
@@ -32,7 +33,8 @@ export interface InsuranceEntry {
   lastUpdated: string;
 }
 
-const SOURCE = "Compiled from Insurify-style 2026 annual homeowner's insurance premium surveys ($300k dwelling reference)";
+const SOURCE =
+  "Estimated state-average annual premiums for a $300,000 dwelling (standard HO-3 policy). These are approximations, not figures from a single named, citable survey — get a real quote before relying on them";
 const LAST_UPDATED = "2026-09-17";
 
 function entry(state: string, stateCode: string, annualPremiumAt300k: number, highCost = false): InsuranceEntry {

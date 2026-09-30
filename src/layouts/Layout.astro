@@ -50,7 +50,7 @@ const breadcrumbSchema = translationSlug
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: new URL(localizedPath(locale, ""), Astro.site ?? Astro.url.origin).toString() },
+        { "@type": "ListItem", position: 1, name: t.breadcrumbHome, item: new URL(localizedPath(locale, ""), Astro.site ?? Astro.url.origin).toString() },
         { "@type": "ListItem", position: 2, name: breadcrumbName, item: canonicalURL.toString() },
       ],
     }
@@ -63,7 +63,6 @@ const breadcrumbSchema = translationSlug
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="TrueAfford" />

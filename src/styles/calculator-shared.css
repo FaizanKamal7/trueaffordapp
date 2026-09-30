@@ -23,6 +23,14 @@
   width: 100%;
 }
 
+/* iOS Safari zooms the page when focusing a control under 16px. Labels stay small. */
+@media (max-width: 900px) {
+  .field input,
+  .field select {
+    font-size: 16px;
+  }
+}
+
 .field-group {
   border: 1px solid var(--color-hairline);
   border-radius: var(--radius-md);
@@ -77,6 +85,14 @@
   font-size: 11px;
   text-decoration: none;
   color: var(--color-mute);
+  position: relative;
+}
+
+/* Invisible 26x26 hit area around the 16px visible circle (WCAG 2.5.8 target size). */
+.info-link::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
 }
 
 .callout {
@@ -283,6 +299,45 @@
   .calculator-form-col {
     position: static;
   }
+}
+
+/*
+  Compact copy of the headline result at the top of the form column, so on
+  a single-column (mobile) layout the answer is visible before the inputs.
+  Hidden on the two-column desktop layout, where the results column is
+  already beside the form. aria-hidden in markup: the full result in
+  .results-col is the accessible (aria-live) source.
+*/
+.mobile-result-summary {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-result-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--color-canvas-elevated);
+  }
+}
+
+.mobile-result-summary .mobile-result-value {
+  font-size: var(--text-heading-md-size);
+  font-weight: 600;
+}
+
+.mobile-result-summary .mobile-result-note {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-body);
+}
+
+.mobile-result-summary a {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-link);
+  text-decoration: none;
 }
 
 .results-col {

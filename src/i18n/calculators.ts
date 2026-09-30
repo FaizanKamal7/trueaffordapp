@@ -1,7 +1,20 @@
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "./locales";
 import type { ConstraintExplanation } from "../lib/engine/constraints";
 import type { UnaffordableReasonDetail } from "../lib/engine/explain";
-import { formatUSD } from "../lib/format";
+import { BUDGET_TARGETS, type BudgetBreakdown } from "../lib/engine/budget";
+import { formatUSD, formatPct } from "../lib/format";
+
+/**
+ * Which single verdict the budget result leads with, in priority order.
+ * Pure branching over the already-computed BudgetBreakdown — no new math.
+ */
+function budgetVerdictKind(b: BudgetBreakdown): "noIncome" | "deficit" | "needsOver" | "savingsShort" | "onTrack" {
+  if (b.netMonthlyIncome <= 0) return "noIncome";
+  if (b.savings < 0) return "deficit";
+  if (b.needsPctOfNet > BUDGET_TARGETS.needsPct) return "needsOver";
+  if (b.savingsPctOfNet < BUDGET_TARGETS.savingsPct) return "savingsShort";
+  return "onTrack";
+}
 
 /**
  * User-visible copy for the calculator components and their client scripts.
@@ -17,6 +30,7 @@ const en = {
     whyThisMatters: "Why this matters",
     resetToRecommended: "Reset to recommended",
     yourResult: "Your result",
+    seeFullBreakdown: "See full breakdown ↓",
     notAffordableYet: "Not affordable at this price yet",
     upTo: " — up to ",
     sustainUpTo: "You can actually sustain up to",
@@ -96,6 +110,7 @@ const en = {
     payoffTime: "Payoff time",
     totalInterest: "Total interest paid",
     fromExtra: "From your extra payment",
+    exampleLabel: (amount: number) => `Example: an extra ${formatUSD(amount)}/month on this loan`,
     saved: (amount: number) => `${formatUSD(amount)} saved`,
     monthsSaved: (months: number) => `${months} months removed from the loan`,
     year: "Year",
@@ -126,6 +141,20 @@ const en = {
     savings: "Savings / debt paydown",
     target: (pct: string) => `target ${pct}`,
     delta: (delta: number) => (delta > 0 ? `${formatUSD(delta)} over target` : `${formatUSD(Math.abs(delta))} under target`),
+    verdict: (b: BudgetBreakdown): string => {
+      switch (budgetVerdictKind(b)) {
+        case "noIncome":
+          return "Enter your monthly take-home pay to see how your budget compares.";
+        case "deficit":
+          return `You're spending ${formatUSD(Math.abs(b.savings))}/month more than your take-home pay.`;
+        case "needsOver":
+          return `Needs take ${formatPct(b.needsPctOfNet)} of take-home pay — ${formatUSD(b.needsDeltaDollars)} over the 50% target.`;
+        case "savingsShort":
+          return `${formatPct(b.savingsPctOfNet)} of take-home pay is left for savings — ${formatUSD(Math.abs(b.savingsDeltaDollars))} short of the 20% target.`;
+        case "onTrack":
+          return `On track: ${formatPct(b.needsPctOfNet)} needs, ${formatPct(b.wantsPctOfNet)} wants, ${formatPct(b.savingsPctOfNet)} savings.`;
+      }
+    },
   },
   car: {
     expensesNote: "Lenders don't count these against you — but they determine whether the car payment actually fits.",
@@ -154,16 +183,16 @@ const en = {
     rentCosts: "Rent-specific costs",
     bindingRules: {
       income: "30% of gross income",
-      screening: "40x annual income (landlord screening)",
+      screening: "Annual income ≥ 40× monthly rent (landlord screening)",
       leftover: "Leftover income after real expenses",
     } as Record<string, string>,
     incomeRow: "30% of gross income",
-    screeningRow: "40x annual income (screening)",
+    screeningRow: "Annual income ≥ 40× monthly rent (screening)",
     leftoverRow: "Leftover income after real expenses",
     maxRent: "Max affordable rent",
     boundBy: "Bound by:",
     explainer:
-      "The 30% rule and the 40x screening rule are mathematically the same threshold — landlords verify it strictly against gross annual income. The leftover-income rule often binds tighter once renters insurance, utilities, and real-life expenses are counted.",
+      "The 30% rule and the 40× screening rule (annual gross income of at least 40 times the monthly rent) are mathematically the same threshold — landlords verify it strictly against gross annual income. The leftover-income rule often binds tighter once renters insurance, utilities, and real-life expenses are counted.",
     testRent: "Test a specific rent",
     leftoverLabel: "Left over each month at this rent",
     overBudget: "This rent is above what this household can sustainably afford by any of the three rules.",
@@ -178,6 +207,7 @@ const en = {
     atYears: (years: number) => `At ${years} years`,
     choices: { buy: "Buying", rent: "Renting", "roughly equal": "Roughly a tie" } as Record<string, string>,
     aheadBy: "comes out ahead by",
+    tieWithin: "— within",
     breakeven: (year: number) => `Buying overtakes renting in net worth around year ${year}.`,
     noBreakeven: "Buying doesn't overtake renting in net worth within 30 years at these assumptions.",
     chartAria: "Net worth over time: buying versus renting",
@@ -220,6 +250,7 @@ const es: CalculatorCopy = {
     whyThisMatters: "Por qué importa",
     resetToRecommended: "Volver al recomendado",
     yourResult: "Tu resultado",
+    seeFullBreakdown: "Ver el desglose completo ↓",
     notAffordableYet: "Aún no es asequible a este precio",
     upTo: " — hasta ",
     sustainUpTo: "Realmente puedes sostener hasta",
@@ -328,6 +359,7 @@ const es: CalculatorCopy = {
     payoffTime: "Tiempo para liquidar",
     totalInterest: "Interés total pagado",
     fromExtra: "Gracias a tu pago adicional",
+    exampleLabel: (amount) => `Ejemplo: ${formatUSD(amount)} adicionales al mes en este préstamo`,
     saved: (amount) => `${formatUSD(amount)} ahorrados`,
     monthsSaved: (months) => `${months} meses menos de préstamo`,
     year: "Año",
@@ -360,6 +392,20 @@ const es: CalculatorCopy = {
     savings: "Ahorro / pago de deudas",
     target: (pct) => `meta ${pct}`,
     delta: (delta) => (delta > 0 ? `${formatUSD(delta)} por encima de la meta` : `${formatUSD(Math.abs(delta))} por debajo de la meta`),
+    verdict: (b) => {
+      switch (budgetVerdictKind(b)) {
+        case "noIncome":
+          return "Ingresa tu ingreso mensual neto para ver cómo se compara tu presupuesto.";
+        case "deficit":
+          return `Gastas ${formatUSD(Math.abs(b.savings))}/mes más de tu ingreso neto.`;
+        case "needsOver":
+          return `Las necesidades ocupan ${formatPct(b.needsPctOfNet)} de tu ingreso neto — ${formatUSD(b.needsDeltaDollars)} por encima de la meta del 50%.`;
+        case "savingsShort":
+          return `Te queda ${formatPct(b.savingsPctOfNet)} de tu ingreso neto para ahorro — ${formatUSD(Math.abs(b.savingsDeltaDollars))} por debajo de la meta del 20%.`;
+        case "onTrack":
+          return `Vas bien: ${formatPct(b.needsPctOfNet)} necesidades, ${formatPct(b.wantsPctOfNet)} deseos, ${formatPct(b.savingsPctOfNet)} ahorro.`;
+      }
+    },
   },
   car: {
     expensesNote: "Los prestamistas no cuentan estos gastos en tu contra — pero determinan si el pago del auto realmente cabe en tu presupuesto.",
@@ -388,16 +434,16 @@ const es: CalculatorCopy = {
     rentCosts: "Costos específicos del alquiler",
     bindingRules: {
       income: "30% del ingreso bruto",
-      screening: "40 veces el ingreso anual (evaluación del arrendador)",
+      screening: "Ingreso anual ≥ 40× el alquiler mensual (evaluación del arrendador)",
       leftover: "Ingreso sobrante después de gastos reales",
     },
     incomeRow: "30% del ingreso bruto",
-    screeningRow: "40 veces el ingreso anual (evaluación)",
+    screeningRow: "Ingreso anual ≥ 40× el alquiler mensual (evaluación)",
     leftoverRow: "Ingreso sobrante después de gastos reales",
     maxRent: "Alquiler máximo asequible",
     boundBy: "Limitado por:",
     explainer:
-      "La regla del 30% y la regla de evaluación de 40 veces son matemáticamente el mismo umbral — los arrendadores la verifican estrictamente contra el ingreso bruto anual. La regla del ingreso sobrante suele ser más estricta una vez que se cuentan el seguro de inquilino, los servicios y los gastos reales.",
+      "La regla del 30% y la regla de evaluación de 40× (ingreso bruto anual de al menos 40 veces el alquiler mensual) son matemáticamente el mismo umbral — los arrendadores la verifican estrictamente contra el ingreso bruto anual. La regla del ingreso sobrante suele ser más estricta una vez que se cuentan el seguro de inquilino, los servicios y los gastos reales.",
     testRent: "Prueba un alquiler específico",
     leftoverLabel: "Lo que te queda cada mes con este alquiler",
     overBudget: "Este alquiler supera lo que este hogar puede pagar de forma sostenible según cualquiera de las tres reglas.",
@@ -409,9 +455,10 @@ const es: CalculatorCopy = {
     monthlyRent: "Alquiler mensual",
     timeline: "Horizonte",
     yearsInHome: "Años que esperas vivir en la vivienda",
-    atYears: (years) => `A ${years} años`,
+    atYears: (years) => (years === 1 ? "Al cabo de 1 año" : `A los ${years} años`),
     choices: { buy: "Comprar", rent: "Alquilar", "roughly equal": "Prácticamente un empate" },
-    aheadBy: "sale adelante por",
+    aheadBy: "sale ganando por",
+    tieWithin: "— diferencia de",
     breakeven: (year) => `Comprar supera a alquilar en patrimonio neto alrededor del año ${year}.`,
     noBreakeven: "Comprar no supera a alquilar en patrimonio neto dentro de 30 años con estos supuestos.",
     chartAria: "Patrimonio neto a lo largo del tiempo: comprar frente a alquilar",

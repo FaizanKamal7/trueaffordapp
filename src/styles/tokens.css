@@ -121,6 +121,9 @@
 
   --container-max: 1200px;
 
+  /* Sticky header height (~94px, constant while scrolling) plus breathing room, for anchor targets. */
+  --nav-offset: 110px;
+
   /* Navigation surfaces */
   --color-nav-start: #fffefa;
   --color-nav-middle: #fffdf6;

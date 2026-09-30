@@ -22,6 +22,8 @@ function renderBudgetResults(scenario: ScenarioState, results: BudgetCalculatorR
   const { budget } = results;
   const deltaText = t.budget.delta;
 
+  setBoundText("verdict", t.budget.verdict(budget));
+
   const warning = el("housing-exceeds-warning");
   if (warning) warning.hidden = !budget.housingAloneExceedsNeedsTarget;
 

@@ -32,10 +32,16 @@ const tierLabels = t.tiers;
 const tc = t.car;
 
 const ruleVsSustainableGap = results.ruleVsSustainableGap;
+const mobileHeadline = results.isUnaffordable ? t.common.notAffordableYet : `${tierLabels[affordability.tier]}${t.common.upTo}${formatUSD(results.evaluatedPrice)}`;
 ---
 
 <div class="calculator-grid" data-car-calculator data-locale={locale}>
   <form id="car-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{t.common.yourResult}</p>
+      <p class="mobile-result-value" id="car-mobile-headline">{mobileHeadline}</p>
+      <a href="#car-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{t.common.incomeAndDebts}</legend>
       <label class="field">

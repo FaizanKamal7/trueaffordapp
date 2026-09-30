@@ -25,6 +25,12 @@ const ruleLabels = tr.bindingRules;
 
 <div class="calculator-grid" data-rent-calculator data-locale={locale}>
   <form id="rent-form" class="calculator-form-col" method="get">
+    <div class="mobile-result-summary" aria-hidden="true">
+      <p class="eyebrow">{t.common.yourResult}</p>
+      <p class="mobile-result-value">{tr.maxRent} — <span data-bind="maxAffordableRent">{formatUSD(rentAffordability.maxAffordableRent)}</span></p>
+      <p class="mobile-result-note">{tr.boundBy} <span data-bind="bindingRule">{ruleLabels[rentAffordability.bindingRule]}</span></p>
+      <a href="#rent-results" tabindex="-1">{t.common.seeFullBreakdown}</a>
+    </div>
     <fieldset class="field-group">
       <legend>{t.common.incomeAndDebts}</legend>
       <label class="field">

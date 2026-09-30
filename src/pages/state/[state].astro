@@ -22,7 +22,7 @@ const results = computeResults(scenario);
 
 const taxEntry = getPropertyTaxRate(stateCode);
 const insuranceEntry = getInsuranceRate(stateCode);
-const calculatorHref = `/mortgage-calculator/${scenarioToQueryString(scenario)}`;
+const calculatorHref = `/home-affordability-calculator/${scenarioToQueryString(scenario)}`;
 
 const statesByTaxRateAsc = Object.values(PROPERTY_TAX_BY_STATE).sort((a, b) => a.effectiveRatePct - b.effectiveRatePct);
 const taxRank = statesByTaxRateAsc.findIndex((e) => e.stateCode === stateCode) + 1;
@@ -114,7 +114,7 @@ const gap = results.riskyMax - results.sustainableMax;
           : `This baseline's own budget can sustain at least as much as a lender's debt-to-income ceiling allows in ${taxEntry.state} — the DTI ratio, not the household budget, is what limits the number here.`}
     </p>
 
-    <a class="btn-primary" href={calculatorHref}>Open the full calculator with these numbers</a>
+    <a class="btn-primary" href={calculatorHref}>Open the home affordability calculator with these numbers</a>
   </section>
 
   <section class="container section nav-section">

@@ -39,6 +39,8 @@ export interface ChromeCopy {
     faqHeading: string;
     relatedLabel: string;
   };
+  /** First item name in the BreadcrumbList schema. */
+  breadcrumbHome: string;
 }
 
 export const CHROME: Record<LocaleCode, ChromeCopy> = {
@@ -81,6 +83,7 @@ export const CHROME: Record<LocaleCode, ChromeCopy> = {
       faqHeading: "Frequently asked questions",
       relatedLabel: "Related:",
     },
+    breadcrumbHome: "Home",
   },
   es: {
     skipToContent: "Saltar al contenido",
@@ -121,5 +124,6 @@ export const CHROME: Record<LocaleCode, ChromeCopy> = {
       faqHeading: "Preguntas frecuentes",
       relatedLabel: "Relacionado:",
     },
+    breadcrumbHome: "Inicio",
   },
 };

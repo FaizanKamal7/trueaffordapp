@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Faq from "../components/layout/Faq.astro";
 import { localizedPath } from "../i18n/locales";
+import { salaryFaqAnswer } from "../lib/salaryBaseline";
 
 const locale = "en" as const;
 
@@ -87,7 +88,7 @@ const categories = [
   },
 ];
 
-const whyItems = [
+const whyItems: { title: string; body: string; link?: { lead: string; href: string; label: string } }[] = [
   {
     title: "Real expenses, not just debt",
     body: "Childcare, healthcare, groceries, and transport all have dedicated fields — not a footnote telling you to stuff them into a \"monthly debts\" box.",
@@ -95,6 +96,7 @@ const whyItems = [
   {
     title: "Your state, not a national average",
     body: "Property tax alone ranges from roughly 0.27% to 2.2% of home value depending on where you live. This calculator uses your state's rate, not a blended guess.",
+    link: { lead: "Compare", href: "/state/", label: "home affordability by state" },
   },
   {
     title: "A maintenance reserve, included by default",
@@ -134,8 +136,7 @@ const faqs = [
   },
   {
     question: "I make $70,000 a year, how much house can I afford?",
-    answer:
-      "At $70,000 a year (about $5,833/month gross), a standard 28% front-end ratio puts your housing budget around $1,630/month, which — depending on your interest rate, down payment, property tax, and insurance — often lands in the roughly $220,000–$280,000 home price range. That figure moves a lot based on your existing debts, down payment size, and real monthly expenses, so it's worth entering your actual numbers into the calculator rather than relying on a rule of thumb.",
+    answer: salaryFaqAnswer(70_000, locale),
   },
   {
     question: "How much can I afford to buy a house?",
@@ -283,7 +284,15 @@ const carHref = localizedPath(locale, "car-affordability-calculator");
               </span>
               <div>
                 <p class="why-title">{item.title}</p>
-                <p>{item.body}</p>
+                <p>
+                  {item.body}
+                  {item.link && (
+                    <>
+                      {" "}
+                      {item.link.lead} <a href={item.link.href}>{item.link.label}</a>.
+                    </>
+                  )}
+                </p>
               </div>
             </li>
           ))
@@ -318,7 +327,7 @@ const carHref = localizedPath(locale, "car-affordability-calculator");
     <h3>Renting and budgeting fit the same math</h3>
     <p>
       Not everyone in the market to buy should buy, and this site treats renting with the same rigor. The <a href={rentHref}>Rent Affordability Calculator</a> checks three independent rules — the
-      30%-of-income guideline, the 40x-annual-income screening test landlords actually use, and a leftover-income test after real expenses — and reports whichever one is strictest, not whichever one is most flattering. Once
+      30%-of-income guideline, the screening test landlords actually use (annual income ≥ 40× monthly rent), and a leftover-income test after real expenses — and reports whichever one is strictest, not whichever one is most flattering. Once
       you have a housing number, whether it's a mortgage payment or rent, the <a href={budgetHref}>Monthly Budget Calculator</a> maps it onto the 50/30/20 rule automatically, using the same income and expense
       figures you already entered, so needs, wants, and savings are never a separate spreadsheet.
     </p>

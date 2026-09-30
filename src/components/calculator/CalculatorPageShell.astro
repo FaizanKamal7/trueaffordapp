@@ -1,5 +1,5 @@
 ---
-import { DEFAULT_LOCALE, localizedPath, withTrailingSlash, type LocaleCode } from "../../i18n/locales";
+import { DEFAULT_LOCALE, type LocaleCode } from "../../i18n/locales";
 import { CHROME } from "../../i18n/chrome";
 import Faq from "../layout/Faq.astro";
 
@@ -24,28 +24,8 @@ interface Props {
 
 const { eyebrow, heading, intro, faqs, crossLinks, locale = DEFAULT_LOCALE } = Astro.props;
 const t = CHROME[locale].shell;
-const site = Astro.site ?? Astro.url.origin;
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      name: "TrueAfford",
-      item: new URL(localizedPath(locale, ""), site).toString(),
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: heading,
-      item: new URL(withTrailingSlash(Astro.url.pathname), site).toString(),
-    },
-  ],
-};
+// BreadcrumbList schema is emitted once, by Layout.astro.
 ---
-
-<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 
 <section class="hero container">
   <p class="eyebrow">{eyebrow}</p>
@@ -56,6 +36,8 @@ const breadcrumbSchema = {
 <section class="container calculator-section">
   <slot />
 </section>
+
+<slot name="after-calculator" />
 
 <Faq faqs={faqs} locale={locale} />
 

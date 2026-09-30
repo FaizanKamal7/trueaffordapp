@@ -20,10 +20,9 @@ function renderRentVsBuyResults(scenario: ScenarioState, results: RentVsBuyCalcu
   const tv = t.rentVsBuy;
   const diff = Math.abs(simulation.netWorthAtTenure.buyer - simulation.netWorthAtTenure.renter);
 
-  const eyebrow = document.querySelector("#rvb-results .eyebrow");
-  if (eyebrow) eyebrow.textContent = tv.atYears(results.tenureYears);
-
+  setBoundText("atYears", tv.atYears(results.tenureYears));
   setBoundText("choice", tv.choices[simulation.betterChoiceAtTenure]);
+  setBoundText("connector", simulation.betterChoiceAtTenure === "roughly equal" ? tv.tieWithin : tv.aheadBy);
   setBoundText("diff", formatUSD(diff));
   setBoundText("buyerNetWorth", formatSignedUSD(simulation.netWorthAtTenure.buyer));
   setBoundText("renterNetWorth", formatSignedUSD(simulation.netWorthAtTenure.renter));

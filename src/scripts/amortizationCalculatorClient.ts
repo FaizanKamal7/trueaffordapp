@@ -27,6 +27,18 @@ function renderAmortizationResults(scenario: ScenarioState, results: Amortizatio
   setBoundText("interestSaved", tm.saved(amortization.interestSaved));
   setBoundText("monthsSaved", tm.monthsSaved(amortization.monthsSaved));
 
+  const example = results.extraPaymentExample;
+  const exampleCallout = el<HTMLElement>("example-callout");
+  if (exampleCallout) exampleCallout.hidden = example === null;
+  if (example) {
+    const label = el("example-label");
+    if (label) label.textContent = tm.exampleLabel(example.extraMonthlyPayment);
+    const saved = el("example-interest-saved");
+    if (saved) saved.textContent = tm.saved(example.interestSaved);
+    const months = el("example-months-saved");
+    if (months) months.textContent = tm.monthsSaved(example.monthsSaved);
+  }
+
   const tbody = el("year-table-body");
   if (tbody) {
     tbody.innerHTML = "";

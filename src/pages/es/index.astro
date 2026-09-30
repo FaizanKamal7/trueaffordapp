@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Faq from "../../components/layout/Faq.astro";
 import { localizedPath } from "../../i18n/locales";
+import { salaryFaqAnswer } from "../../lib/salaryBaseline";
 
 const locale = "es" as const;
 
@@ -134,8 +135,7 @@ const faqs = [
   },
   {
     question: "Gano $70,000 al año, ¿cuánta casa puedo pagar?",
-    answer:
-      "Con $70,000 al año (unos $5,833/mes brutos), una razón inicial estándar del 28% coloca tu presupuesto de vivienda alrededor de $1,630/mes, lo cual — dependiendo de tu tasa de interés, enganche, impuesto predial y seguro — a menudo cae en un rango de precio de vivienda de aproximadamente $220,000 a $280,000. Esa cifra se mueve mucho según tus deudas existentes, el tamaño de tu enganche y tus gastos mensuales reales, así que vale la pena ingresar tus números reales en la calculadora en lugar de confiar en una regla general.",
+    answer: salaryFaqAnswer(70_000, locale),
   },
   {
     question: "¿Cuánto puedo pagar para comprar una casa?",
@@ -318,7 +318,7 @@ const carHref = localizedPath(locale, "car-affordability-calculator");
     <h3>Alquilar y presupuestar siguen la misma matemática</h3>
     <p>
       No todo el que está en el mercado para comprar debería comprar, y este sitio trata el alquiler con el mismo rigor. La <a href={rentHref}>Calculadora de Asequibilidad de Alquiler</a> verifica tres reglas independientes — la
-      pauta del 30% del ingreso, la prueba de evaluación del 40x el ingreso anual que los arrendadores realmente usan, y una prueba de ingreso sobrante después de gastos reales — y reporta la que sea más estricta, no la que sea más halagadora. Una
+      pauta del 30% del ingreso, la prueba de evaluación que los arrendadores realmente usan (ingreso anual ≥ 40× el alquiler mensual), y una prueba de ingreso sobrante después de gastos reales — y reporta la que sea más estricta, no la que sea más halagadora. Una
       vez que tienes un número de vivienda, ya sea un pago hipotecario o un alquiler, la <a href={budgetHref}>Calculadora de Presupuesto Mensual</a> lo ubica automáticamente dentro de la regla 50/30/20, usando las mismas
       cifras de ingreso y gastos que ya ingresaste, así que necesidades, deseos y ahorros nunca son una hoja de cálculo aparte.
     </p>
